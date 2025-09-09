@@ -19,7 +19,8 @@ import {
   Search, 
   MoreHorizontal,
   Edit,
-  Eye
+  Eye,
+  QrCode
 } from 'lucide-react';
 import { Event } from '@/lib/types';
 import { sampleEvents, getEventStats, eventTypes, eventStatuses } from '@/lib/data';
@@ -27,6 +28,9 @@ import { format } from 'date-fns';
 import { EventForm } from './event-form';
 import { CalendarView } from './calendar-view';
 import { KanbanBoard } from './kanban-board';
+import { AnalyticsDashboard } from './analytics-dashboard';
+import { EventTemplates } from './event-templates';
+import { QRCodeGenerator } from './qr-code-generator';
 
 export function Dashboard() {
   const [events, setEvents] = useState<Event[]>(sampleEvents);
@@ -36,6 +40,8 @@ export function Dashboard() {
   const [showEventForm, setShowEventForm] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | undefined>();
   const [selectedEvent, setSelectedEvent] = useState<Event | undefined>();
+  const [showQRGenerator, setShowQRGenerator] = useState(false);
+  const [qrEvent, setQrEvent] = useState<Event | undefined>();
 
   const stats = getEventStats(events);
 
@@ -86,6 +92,17 @@ export function Dashboard() {
     setEvents(events.map(event => 
       event.id === eventId ? { ...event, ...updates } : event
     ));
+  };
+
+  const handleUseTemplate = (template: Event) => {
+    setEvents([...events, template]);
+    setEditingEvent(template);
+    setShowEventForm(true);
+  };
+
+  const handleGenerateQR = (event: Event) => {
+    setQrEvent(event);
+    setShowQRGenerator(true);
   };
 
   return (
@@ -175,6 +192,8 @@ export function Dashboard() {
             <TabsTrigger value="events">All Events</TabsTrigger>
             <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
             <TabsTrigger value="kanban">Workflow</TabsTrigger>
+            <TabsTrigger value="templates">Templates</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="calendar">Calendar</TabsTrigger>
           </TabsList>
 
@@ -413,6 +432,14 @@ export function Dashboard() {
             />
           </TabsContent>
 
+          <TabsContent value="templates" className="space-y-6">
+            <EventTemplates onUseTemplate={handleUseTemplate} />
+          </TabsContent>
+
+          <TabsContent value="analytics" className="space-y-6">
+            <AnalyticsDashboard events={events} />
+          </TabsContent>
+
           <TabsContent value="calendar" className="space-y-6">
             <CalendarView 
               events={events} 
@@ -499,6 +526,10 @@ export function Dashboard() {
                 <Button variant="outline" onClick={() => setSelectedEvent(undefined)}>
                   Close
                 </Button>
+                <Button variant="outline" onClick={() => handleGenerateQR(selectedEvent)}>
+                  <QrCode className="w-4 h-4 mr-2" />
+                  Generate QR Code
+                </Button>
                 <Button onClick={() => handleEditEvent(selectedEvent)}>
                   Edit Event
                 </Button>
@@ -507,6 +538,18 @@ export function Dashboard() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* QR Code Generator Dialog */}
+      {showQRGenerator && (
+        <Dialog open={showQRGenerator} onOpenChange={setShowQRGenerator}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <QRCodeGenerator 
+              event={qrEvent} 
+              onClose={() => setShowQRGenerator(false)} 
+            />
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
