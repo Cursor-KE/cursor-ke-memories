@@ -4,7 +4,6 @@ import { useState } from 'react';
 import {
   DndContext,
   DragEndEvent,
-  DragOverEvent,
   DragOverlay,
   DragStartEvent,
   PointerSensor,
@@ -43,7 +42,13 @@ interface KanbanBoardProps {
 }
 
 interface KanbanColumnProps {
-  stage: typeof kanbanStages[0];
+  stage: {
+    value: string;
+    label: string;
+    description: string;
+    color: string;
+    textColor: string;
+  };
   events: Event[];
   onEventClick: (event: Event) => void;
   onEventEdit: (event: Event) => void;

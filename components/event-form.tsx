@@ -37,10 +37,12 @@ const eventSchema = z.object({
   country: z.string().min(1, 'Country is required'),
   tags: z.array(z.string()).min(1, 'At least one tag is required'),
   speakers: z.array(z.object({
+    id: z.string().optional(),
     name: z.string().min(1, 'Speaker name is required'),
     title: z.string().min(1, 'Speaker title is required'),
     company: z.string().min(1, 'Speaker company is required'),
     bio: z.string().min(1, 'Speaker bio is required'),
+    avatar: z.string().optional(),
     socialLinks: z.object({
       twitter: z.string().optional(),
       linkedin: z.string().optional(),
@@ -131,6 +133,11 @@ export function EventForm({ event, onSave, onCancel }: EventFormProps) {
       ...data,
       date: new Date(data.date),
       location: data.isOnline ? 'Online' : `${data.venue}, ${data.city}, ${data.country}`,
+      speakers: data.speakers.map(speaker => ({
+        ...speaker,
+        id: speaker.id || Date.now().toString() + Math.random().toString(36).substr(2, 9),
+        avatar: speaker.avatar || undefined,
+      })),
       imageUrl: event?.imageUrl,
       attendees: event?.attendees || [],
       createdAt: event?.createdAt || new Date(),
