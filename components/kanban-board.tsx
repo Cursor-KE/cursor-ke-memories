@@ -207,14 +207,14 @@ export function KanbanBoard({ events, onEventUpdate, onEventClick, onEventEdit }
     return acc;
   }, {} as Record<string, Event[]>);
 
-  const handleDragStart = (event: DragStartEvent) => {
-    const eventId = event.active.id as string;
+  const handleDragStart = (dragEvent: DragStartEvent) => {
+    const eventId = dragEvent.active.id as string;
     const event = events.find(e => e.id === eventId);
     setActiveEvent(event || null);
   };
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
+  const handleDragEnd = (dragEvent: DragEndEvent) => {
+    const { active, over } = dragEvent;
     setActiveEvent(null);
 
     if (!over) return;
@@ -228,7 +228,7 @@ export function KanbanBoard({ events, onEventUpdate, onEventClick, onEventEdit }
     }
   };
 
-  const handleDragOver = (event: DragOverEvent) => {
+  const handleDragOver = (dragEvent: DragOverEvent) => {
     // Handle drag over logic if needed
   };
 
