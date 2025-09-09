@@ -110,9 +110,9 @@ export function Dashboard() {
       {/* Header */}
       <div className="bg-white dark:bg-gray-800 border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
+          <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-4 py-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
                 Event Planner
               </h1>
               <p className="text-gray-600 dark:text-gray-400 mt-1">
@@ -120,7 +120,7 @@ export function Dashboard() {
               </p>
             </div>
             <Button 
-              className="bg-blue-600 hover:bg-blue-700"
+              className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
               onClick={handleCreateEvent}
             >
               <Plus className="w-4 h-4 mr-2" />
@@ -451,7 +451,7 @@ export function Dashboard() {
 
       {/* Event Form Dialog */}
       <Dialog open={showEventForm} onOpenChange={setShowEventForm}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="w-[calc(100%-1rem)] sm:max-w-4xl md:max-w-5xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
           <DialogHeader>
             <DialogTitle>
               {editingEvent ? 'Edit Event' : 'Create New Event'}
@@ -467,7 +467,7 @@ export function Dashboard() {
 
       {/* Event Details Dialog */}
       <Dialog open={!!selectedEvent} onOpenChange={() => setSelectedEvent(undefined)}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="w-[calc(100%-1rem)] sm:max-w-2xl p-4 sm:p-6">
           <DialogHeader>
             <DialogTitle>{selectedEvent?.title}</DialogTitle>
             <CardDescription>
@@ -542,7 +542,7 @@ export function Dashboard() {
       {/* QR Code Generator Dialog */}
       {showQRGenerator && (
         <Dialog open={showQRGenerator} onOpenChange={setShowQRGenerator}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="w-[calc(100%-1rem)] sm:max-w-4xl md:max-w-5xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
             <QRCodeGenerator 
               event={qrEvent} 
               onClose={() => setShowQRGenerator(false)} 

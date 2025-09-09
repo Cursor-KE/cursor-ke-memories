@@ -74,7 +74,7 @@ export function AnalyticsDashboard({ events }: AnalyticsDashboardProps) {
 
   // Event status distribution
   const statusData = events.reduce((acc, event) => {
-    const existing = acc.find(item => item.name => event.status);
+    const existing = acc.find(item => item.name === event.status);
     if (existing) {
       existing.value += 1;
     } else {
