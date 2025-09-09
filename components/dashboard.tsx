@@ -268,73 +268,142 @@ export function Dashboard() {
                     )}
                   </div>
                 ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Event</TableHead>
-                        <TableHead>Date & Time</TableHead>
-                        <TableHead>Location</TableHead>
-                        <TableHead>Type</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Attendees</TableHead>
-                        <TableHead className="w-[50px]"></TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
+                  <>
+                    {/* Mobile card list */}
+                    <div className="md:hidden space-y-3">
                       {filteredEvents.map((event) => (
-                        <TableRow key={event.id}>
-                          <TableCell>
-                            <div>
-                              <div className="font-medium">{event.title}</div>
-                              <div className="text-sm text-gray-500 line-clamp-2">
-                                {event.description}
-                              </div>
+                        <div key={event.id} className="p-4 border rounded-lg">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium truncate">{event.title}</div>
+                              <div className="text-sm text-gray-500 line-clamp-2">{event.description}</div>
                             </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="text-sm">
-                              <div>{format(event.date, 'MMM dd, yyyy')}</div>
-                              <div className="text-gray-500">
-                                {event.startTime} - {event.endTime}
-                              </div>
+                            <div className="flex flex-col items-end gap-1">
+                              <Badge variant="secondary">
+                                {eventTypes.find(t => t.value === event.eventType)?.label}
+                              </Badge>
+                              <Badge 
+                                variant={
+                                  event.status === 'published' ? 'default' :
+                                  event.status === 'draft' ? 'secondary' :
+                                  event.status === 'cancelled' ? 'destructive' : 'outline'
+                                }
+                              >
+                                {eventStatuses.find(s => s.value === event.status)?.label}
+                              </Badge>
                             </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center text-sm">
-                              <MapPin className="h-4 w-4 mr-1 text-gray-400" />
+                          </div>
+                          <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-gray-600 dark:text-gray-400">
+                            <div className="flex items-center gap-1">
+                              <Calendar className="h-3 w-3" />
+                              {format(event.date, 'MMM dd, yyyy')}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              {event.startTime} - {event.endTime}
+                            </div>
+                            <div className="flex items-center gap-1 col-span-2">
+                              <MapPin className="h-3 w-3" />
                               {event.isOnline ? 'Online' : event.city}
                             </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="secondary">
-                              {eventTypes.find(t => t.value === event.eventType)?.label}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Badge 
-                              variant={
-                                event.status === 'published' ? 'default' :
-                                event.status === 'draft' ? 'secondary' :
-                                event.status === 'cancelled' ? 'destructive' : 'outline'
-                              }
-                            >
-                              {eventStatuses.find(s => s.value === event.status)?.label}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div className="text-sm">
-                              {event.attendees.filter(a => a.rsvpStatus === 'confirmed').length} / {event.capacity}
+                            <div className="flex items-center gap-1 col-span-2">
+                              <Users className="h-3 w-3" />
+                              {event.attendees.filter(a => a.rsvpStatus === 'confirmed').length} / {event.capacity} attendees
                             </div>
-                          </TableCell>
-                          <TableCell>
-                            <Button variant="ghost" size="sm">
-                              <MoreHorizontal className="h-4 w-4" />
+                          </div>
+                          <div className="mt-3 flex gap-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleEventClick(event)}
+                            >
+                              <Eye className="h-4 w-4 mr-1" />
+                              View
                             </Button>
-                          </TableCell>
-                        </TableRow>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleEditEvent(event)}
+                            >
+                              <Edit className="h-4 w-4 mr-1" />
+                              Edit
+                            </Button>
+                          </div>
+                        </div>
                       ))}
-                    </TableBody>
-                  </Table>
+                    </div>
+
+                    {/* Desktop table */}
+                    <div className="hidden md:block">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Event</TableHead>
+                            <TableHead>Date & Time</TableHead>
+                            <TableHead>Location</TableHead>
+                            <TableHead>Type</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Attendees</TableHead>
+                            <TableHead className="w-[50px]"></TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {filteredEvents.map((event) => (
+                            <TableRow key={event.id}>
+                              <TableCell>
+                                <div>
+                                  <div className="font-medium">{event.title}</div>
+                                  <div className="text-sm text-gray-500 line-clamp-2">
+                                    {event.description}
+                                  </div>
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <div className="text-sm">
+                                  <div>{format(event.date, 'MMM dd, yyyy')}</div>
+                                  <div className="text-gray-500">
+                                    {event.startTime} - {event.endTime}
+                                  </div>
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center text-sm">
+                                  <MapPin className="h-4 w-4 mr-1 text-gray-400" />
+                                  {event.isOnline ? 'Online' : event.city}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant="secondary">
+                                  {eventTypes.find(t => t.value === event.eventType)?.label}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <Badge 
+                                  variant={
+                                    event.status === 'published' ? 'default' :
+                                    event.status === 'draft' ? 'secondary' :
+                                    event.status === 'cancelled' ? 'destructive' : 'outline'
+                                  }
+                                >
+                                  {eventStatuses.find(s => s.value === event.status)?.label}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <div className="text-sm">
+                                  {event.attendees.filter(a => a.rsvpStatus === 'confirmed').length} / {event.capacity}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <Button variant="ghost" size="sm">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </>
                 )}
               </CardContent>
             </Card>

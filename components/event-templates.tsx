@@ -268,7 +268,7 @@ export function EventTemplates({ onUseTemplate }: EventTemplatesProps) {
           <Plus className="h-12 w-12 text-gray-400 mb-4" />
           <h3 className="text-lg font-semibold mb-2">Create Custom Template</h3>
           <p className="text-gray-600 dark:text-gray-400 text-center mb-4">
-            Don't see what you're looking for? Create your own custom event template.
+            Don&apos;t see what you&apos;re looking for? Create your own custom event template.
           </p>
           <Button variant="outline">
             <Sparkles className="w-4 h-4 mr-2" />
