@@ -28,6 +28,7 @@ import { sampleEvents, getEventStats, eventTypes, eventStatuses } from '@/lib/da
 import { format } from 'date-fns';
 import { EventForm } from './event-form';
 import { CalendarView } from './calendar-view';
+import { KanbanBoard } from './kanban-board';
 
 export function Dashboard() {
   const [events, setEvents] = useState<Event[]>(sampleEvents);
@@ -81,6 +82,12 @@ export function Dashboard() {
 
   const handleEventClick = (event: Event) => {
     setSelectedEvent(event);
+  };
+
+  const handleEventUpdate = (eventId: string, updates: Partial<Event>) => {
+    setEvents(events.map(event => 
+      event.id === eventId ? { ...event, ...updates } : event
+    ));
   };
 
   return (
@@ -169,6 +176,7 @@ export function Dashboard() {
           <TabsList>
             <TabsTrigger value="events">All Events</TabsTrigger>
             <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
+            <TabsTrigger value="kanban">Workflow</TabsTrigger>
             <TabsTrigger value="calendar">Calendar</TabsTrigger>
           </TabsList>
 
@@ -396,6 +404,15 @@ export function Dashboard() {
                 ))}
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="kanban" className="space-y-6">
+            <KanbanBoard
+              events={events}
+              onEventUpdate={handleEventUpdate}
+              onEventClick={handleEventClick}
+              onEventEdit={handleEditEvent}
+            />
           </TabsContent>
 
           <TabsContent value="calendar" className="space-y-6">

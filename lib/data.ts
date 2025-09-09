@@ -42,3 +42,41 @@ export const eventStatuses = [
   { value: 'cancelled', label: 'Cancelled' },
   { value: 'completed', label: 'Completed' }
 ] as const;
+
+export const kanbanStages = [
+  { 
+    value: 'planning', 
+    label: 'Planning', 
+    description: 'Initial planning and setup',
+    color: 'bg-gray-500',
+    textColor: 'text-gray-700'
+  },
+  { 
+    value: 'preparation', 
+    label: 'Preparation', 
+    description: 'Getting ready for the event',
+    color: 'bg-blue-500',
+    textColor: 'text-blue-700'
+  },
+  { 
+    value: 'promotion', 
+    label: 'Promotion', 
+    description: 'Marketing and promotion phase',
+    color: 'bg-yellow-500',
+    textColor: 'text-yellow-700'
+  },
+  { 
+    value: 'execution', 
+    label: 'Execution', 
+    description: 'Event is happening now',
+    color: 'bg-green-500',
+    textColor: 'text-green-700'
+  },
+  { 
+    value: 'completion', 
+    label: 'Completion', 
+    description: 'Event completed successfully',
+    color: 'bg-purple-500',
+    textColor: 'text-purple-700'
+  }
+] as const;

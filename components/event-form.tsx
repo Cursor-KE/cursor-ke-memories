@@ -16,7 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { X, Plus } from 'lucide-react';
 import { Event, Speaker } from '@/lib/types';
-import { eventTypes, eventStatuses } from '@/lib/data';
+import { eventTypes, eventStatuses, kanbanStages } from '@/lib/data';
 
 const eventSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -26,6 +26,7 @@ const eventSchema = z.object({
   endTime: z.string().min(1, 'End time is required'),
   eventType: z.enum(['conference', 'meetup', 'workshop', 'hackathon', 'webinar', 'networking']),
   status: z.enum(['draft', 'published', 'cancelled', 'completed']),
+  kanbanStage: z.enum(['planning', 'preparation', 'promotion', 'execution', 'completion']),
   capacity: z.number().min(1, 'Capacity must be at least 1'),
   price: z.number().min(0, 'Price cannot be negative'),
   currency: z.string().min(1, 'Currency is required'),
@@ -77,6 +78,7 @@ export function EventForm({ event, onSave, onCancel }: EventFormProps) {
       endTime: event?.endTime || '',
       eventType: event?.eventType || 'meetup',
       status: event?.status || 'draft',
+      kanbanStage: event?.kanbanStage || 'planning',
       capacity: event?.capacity || 50,
       price: event?.price || 0,
       currency: event?.currency || 'KES',
@@ -447,20 +449,41 @@ export function EventForm({ event, onSave, onCancel }: EventFormProps) {
               </TabsContent>
 
               <TabsContent value="settings" className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="status">Status</Label>
-                  <Select onValueChange={(value) => form.setValue('status', value as any)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {eventStatuses.map((status) => (
-                        <SelectItem key={status.value} value={status.value}>
-                          {status.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="status">Status</Label>
+                    <Select onValueChange={(value) => form.setValue('status', value as any)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {eventStatuses.map((status) => (
+                          <SelectItem key={status.value} value={status.value}>
+                            {status.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="kanbanStage">Workflow Stage</Label>
+                    <Select onValueChange={(value) => form.setValue('kanbanStage', value as any)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select stage" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {kanbanStages.map((stage) => (
+                          <SelectItem key={stage.value} value={stage.value}>
+                            <div className="flex items-center gap-2">
+                              <div className={`w-2 h-2 rounded-full ${stage.color}`} />
+                              {stage.label}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </TabsContent>
             </Tabs>

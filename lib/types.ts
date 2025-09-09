@@ -12,6 +12,7 @@ export interface Event {
   country: string;
   eventType: 'conference' | 'meetup' | 'workshop' | 'hackathon' | 'webinar' | 'networking';
   status: 'draft' | 'published' | 'cancelled' | 'completed';
+  kanbanStage: 'planning' | 'preparation' | 'promotion' | 'execution' | 'completion';
   capacity: number;
   price: number;
   currency: string;
