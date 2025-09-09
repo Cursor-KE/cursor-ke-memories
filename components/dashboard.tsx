@@ -8,8 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { 
   Calendar, 
   Users, 
@@ -17,13 +17,11 @@ import {
   Clock, 
   Plus, 
   Search, 
-  Filter,
   MoreHorizontal,
   Edit,
-  Trash2,
   Eye
 } from 'lucide-react';
-import { Event, EventStats } from '@/lib/types';
+import { Event } from '@/lib/types';
 import { sampleEvents, getEventStats, eventTypes, eventStatuses } from '@/lib/data';
 import { format } from 'date-fns';
 import { EventForm } from './event-form';

@@ -15,7 +15,6 @@ import {
 import {
   SortableContext,
   verticalListSortingStrategy,
-  arrayMove,
 } from '@dnd-kit/sortable';
 import {
   useSortable,
@@ -228,7 +227,7 @@ export function KanbanBoard({ events, onEventUpdate, onEventClick, onEventEdit }
     }
   };
 
-  const handleDragOver = (dragEvent: DragOverEvent) => {
+  const handleDragOver = () => {
     // Handle drag over logic if needed
   };
 

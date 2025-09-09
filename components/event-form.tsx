@@ -10,7 +10,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -93,7 +92,7 @@ export function EventForm({ event, onSave, onCancel }: EventFormProps) {
     },
   });
 
-  const { watch, setValue, getValues } = form;
+  const { watch, setValue } = form;
   const isOnline = watch('isOnline');
   const tags = watch('tags');
   const speakers = watch('speakers');
@@ -131,6 +130,7 @@ export function EventForm({ event, onSave, onCancel }: EventFormProps) {
       id: event?.id || Date.now().toString(),
       ...data,
       date: new Date(data.date),
+      location: data.isOnline ? 'Online' : `${data.venue}, ${data.city}, ${data.country}`,
       imageUrl: event?.imageUrl,
       attendees: event?.attendees || [],
       createdAt: event?.createdAt || new Date(),
@@ -174,7 +174,7 @@ export function EventForm({ event, onSave, onCancel }: EventFormProps) {
 
                   <div className="space-y-2">
                     <Label htmlFor="eventType">Event Type *</Label>
-                    <Select onValueChange={(value) => form.setValue('eventType', value as any)}>
+                    <Select onValueChange={(value) => form.setValue('eventType', value as Event['eventType'])}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select event type" />
                       </SelectTrigger>
@@ -452,7 +452,7 @@ export function EventForm({ event, onSave, onCancel }: EventFormProps) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="status">Status</Label>
-                    <Select onValueChange={(value) => form.setValue('status', value as any)}>
+                    <Select onValueChange={(value) => form.setValue('status', value as Event['status'])}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select status" />
                       </SelectTrigger>
@@ -468,7 +468,7 @@ export function EventForm({ event, onSave, onCancel }: EventFormProps) {
 
                   <div className="space-y-2">
                     <Label htmlFor="kanbanStage">Workflow Stage</Label>
-                    <Select onValueChange={(value) => form.setValue('kanbanStage', value as any)}>
+                    <Select onValueChange={(value) => form.setValue('kanbanStage', value as Event['kanbanStage'])}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select stage" />
                       </SelectTrigger>

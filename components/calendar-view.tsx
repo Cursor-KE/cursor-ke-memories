@@ -4,8 +4,6 @@ import { useState } from 'react';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarIcon, Clock, MapPin, Users } from 'lucide-react';
 import { format, isSameDay } from 'date-fns';
 import { Event } from '@/lib/types';
