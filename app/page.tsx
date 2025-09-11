@@ -1,5 +1,5 @@
-import { Dashboard } from '@/components/dashboard';
+import { AIAgentDashboard } from "@/components/ai-agent-dashboard"
 
 export default function Home() {
-  return <Dashboard />;
+  return <AIAgentDashboard />
 }
