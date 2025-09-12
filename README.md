@@ -111,15 +111,29 @@ yarn install
 3. **Set up environment variables**
 Create a `.env.local` file in the root directory:
 \`\`\`env
-# Optional: Add your preferred LLM API keys
-OPENAI_API_KEY=your_openai_key_here
-GOOGLE_AI_API_KEY=your_gemini_key_here
-ANTHROPIC_API_KEY=your_anthropic_key_here
-GROQ_API_KEY=your_groq_key_here
-COHERE_API_KEY=your_cohere_key_here
+# LLM API Keys - Add your API keys here
+# You can get these from the respective providers:
+
+# OpenAI (https://platform.openai.com/api-keys)
+OPENAI_API_KEY=sk-your-openai-key-here
+
+# Google AI (https://makersuite.google.com/app/apikey)
+GOOGLE_GENERATIVE_AI_API_KEY=your-google-ai-key-here
+
+# Anthropic (https://console.anthropic.com/)
+ANTHROPIC_API_KEY=sk-ant-your-anthropic-key-here
+
+# Groq (https://console.groq.com/keys)
+GROQ_API_KEY=gsk_your-groq-key-here
+
+# Cohere (https://dashboard.cohere.ai/api-keys)
+COHERE_API_KEY=your-cohere-key-here
 
 # For production deployment
 NEXT_PUBLIC_APP_URL=https://your-domain.com
+```
+
+**Note**: You only need to add the API keys for the LLM providers you want to use. The system will automatically detect which providers are available and use the first one found.
 \`\`\`
 
 4. **Run the development server**

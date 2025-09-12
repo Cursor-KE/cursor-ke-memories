@@ -135,11 +135,31 @@ export function APIIntegrations() {
     }
   }
 
-  const handleSaveLlmKeys = () => {
-    // Save to localStorage or send to API
-    localStorage.setItem("llm-keys", JSON.stringify(llmKeys))
-    setShowLlmForm(false)
-    // Show success message
+  const handleSaveLlmKeys = async () => {
+    try {
+      // Save to localStorage
+      localStorage.setItem("llm-keys", JSON.stringify(llmKeys))
+      
+      // Also save to API for server-side access
+      const response = await fetch("/api/integrations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "save-llm-keys",
+          keys: llmKeys
+        })
+      })
+      
+      if (response.ok) {
+        setShowLlmForm(false)
+        // Show success message
+        console.log("LLM keys saved successfully")
+      } else {
+        throw new Error("Failed to save LLM keys")
+      }
+    } catch (error) {
+      console.error("Error saving LLM keys:", error)
+    }
   }
 
   if (isLoading) {

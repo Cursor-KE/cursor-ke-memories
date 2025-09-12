@@ -3,77 +3,47 @@
 import type React from "react"
 
 import { useState, useEffect, useCallback } from "react"
+import { useChat } from "ai/react"
 import { AIAgent } from "@/lib/ai-agent"
 import { requestOptimizer } from "@/lib/request-optimizer"
 import { performanceMonitor } from "@/lib/performance-monitor"
 
 function useCustomChat(apiEndpoint: string) {
-  const [messages, setMessages] = useState<Array<{ role: string; content: string; id: string }>>([])
-  const [input, setInput] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<Error | null>(null)
+  const [llmConfig, setLlmConfig] = useState<any>(null)
+  
+  const {
+    messages,
+    input,
+    handleInputChange,
+    handleSubmit: originalHandleSubmit,
+    isLoading,
+    error,
+  } = useChat({
+    api: apiEndpoint,
+    body: {
+      llmConfig: llmConfig,
+    },
+  })
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setInput(e.target.value)
-  }
-
-  const handleSubmit = async (e: React.FormEvent, context?: string) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!input.trim() || isLoading) return
-
-    const userMessage = { role: "user", content: input, id: Date.now().toString() }
-    setMessages((prev) => [...prev, userMessage])
-    const currentInput = input
-    setInput("")
-    setIsLoading(true)
-    setError(null)
-
-    try {
-      const response = await fetch(apiEndpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messages: [...messages, userMessage],
-          context: context || "",
-        }),
-      })
-
-      if (!response.ok) throw new Error("Failed to get response")
-
-      const reader = response.body?.getReader()
-      const decoder = new TextDecoder()
-      let assistantContent = ""
-
-      const assistantMessage = { role: "assistant", content: "", id: (Date.now() + 1).toString() }
-      setMessages((prev) => [...prev, assistantMessage])
-
-      if (reader) {
-        while (true) {
-          const { done, value } = await reader.read()
-          if (done) break
-
-          const chunk = decoder.decode(value)
-          assistantContent += chunk
-
-          setMessages((prev) =>
-            prev.map((msg) => (msg.id === assistantMessage.id ? { ...msg, content: assistantContent } : msg)),
-          )
-        }
-      }
-    } catch (err) {
-      setError(err as Error)
-    } finally {
-      setIsLoading(false)
-    }
+    originalHandleSubmit(e)
   }
 
   return {
-    messages,
+    messages: messages.map(msg => ({
+      id: msg.id,
+      role: msg.role,
+      content: msg.content,
+    })),
     input,
     handleInputChange,
     handleSubmit,
     isLoading,
     error,
+    llmConfig,
+    setLlmConfig,
   }
 }
 
@@ -90,6 +60,8 @@ export function useAIAgent() {
     handleSubmit: originalHandleSubmit,
     isLoading: isChatLoading,
     error,
+    llmConfig,
+    setLlmConfig,
   } = useCustomChat("/api/chat")
 
   useEffect(() => {
@@ -145,9 +117,8 @@ export function useAIAgent() {
         performanceMonitor.trackUserInteraction("message_send", performance.now() - interactionStart)
       }
 
-      // Pass relevant context to the submit handler
-      const relevantContext = agent?.getRelevantContext(input) || ""
-      originalHandleSubmit(e, relevantContext)
+      // Use the original handleSubmit from useChat
+      originalHandleSubmit(e)
     },
     [agent, input, originalHandleSubmit],
   )
@@ -223,5 +194,7 @@ export function useAIAgent() {
     clearOldContext,
     getContextMetrics,
     agent,
+    llmConfig,
+    setLlmConfig,
   }
 }
