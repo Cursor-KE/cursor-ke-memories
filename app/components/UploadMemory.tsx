@@ -1,0 +1,332 @@
+'use client';
+
+import { useState, useRef } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Icon } from '@iconify/react';
+
+interface UploadMemoryProps {
+  onClose: () => void;
+  onSuccess?: () => void;
+}
+
+interface UploadedFile {
+  file: File;
+  preview: string;
+  id: string;
+}
+
+export default function UploadMemory({ onClose, onSuccess }: UploadMemoryProps) {
+  const [files, setFiles] = useState<UploadedFile[]>([]);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [category, setCategory] = useState<'Memory' | 'Activity'>('Memory');
+  const [isBlackWhite, setIsBlackWhite] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(event.target.files || []);
+    addFiles(selectedFiles);
+  };
+
+  const addFiles = (selectedFiles: File[]) => {
+    if (files.length + selectedFiles.length > 5) {
+      alert('Maximum 5 files allowed');
+      return;
+    }
+
+    // Check file sizes (max 10MB per file)
+    const oversizedFiles = selectedFiles.filter(file => file.size > 10 * 1024 * 1024);
+    if (oversizedFiles.length > 0) {
+      alert(`Some files are too large (max 10MB each). Please compress them first.`);
+      return;
+    }
+
+    const newFiles: UploadedFile[] = selectedFiles.map(file => ({
+      file,
+      preview: URL.createObjectURL(file),
+      id: Math.random().toString(36).substr(2, 9)
+    }));
+
+    setFiles(prev => [...prev, ...newFiles]);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const droppedFiles = Array.from(e.dataTransfer.files).filter(file => 
+      file.type.startsWith('image/')
+    );
+    addFiles(droppedFiles);
+  };
+
+  const removeFile = (id: string) => {
+    setFiles(prev => {
+      const fileToRemove = prev.find(f => f.id === id);
+      if (fileToRemove) {
+        URL.revokeObjectURL(fileToRemove.preview);
+      }
+      return prev.filter(f => f.id !== id);
+    });
+  };
+
+  const handleUpload = async () => {
+    if (files.length === 0 || !title.trim()) {
+      alert('Please select files and add a title');
+      return;
+    }
+
+    setIsUploading(true);
+    setUploadProgress(0);
+
+    try {
+      // Prepare form data for upload
+      const formData = new FormData();
+      formData.append('title', title);
+      formData.append('description', description);
+      formData.append('category', category);
+      formData.append('isBlackWhite', isBlackWhite.toString());
+
+      // Add files to form data
+      files.forEach((uploadedFile, index) => {
+        formData.append(`file_${index}`, uploadedFile.file);
+      });
+
+      // Simulate progress
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => Math.min(prev + 10, 90));
+      }, 1000);
+
+      // Upload to Supabase and Cloudinary with timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
+
+      const response = await fetch('/api/upload-memory', {
+        method: 'POST',
+        body: formData,
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+      clearInterval(progressInterval);
+      setUploadProgress(100);
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Upload failed');
+      }
+
+      alert('Memory uploaded successfully!');
+      
+      // Reset form
+      setFiles([]);
+      setTitle('');
+      setDescription('');
+      setCategory('Memory');
+      setIsBlackWhite(false);
+      setUploadProgress(0);
+      
+      // Call success callback to refresh gallery
+      if (onSuccess) {
+        onSuccess();
+      }
+      
+      onClose();
+    } catch (error) {
+      console.error('Upload error:', error);
+      if (error instanceof Error && error.name === 'AbortError') {
+        alert('Upload timed out. Please try with smaller images or fewer files.');
+      } else {
+        alert(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      }
+    } finally {
+      setIsUploading(false);
+      setUploadProgress(0);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-card border-border">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle className="text-2xl text-foreground">Add Your Cursor Memory</CardTitle>
+          <Button variant="ghost" size="sm" onClick={onClose}>
+            <Icon icon="mdi:close" className="w-5 h-5" />
+          </Button>
+        </CardHeader>
+
+        <CardContent className="space-y-6">
+          {/* File Upload */}
+          <div className="space-y-4">
+            <Label className="text-foreground">Photos (up to 5)</Label>
+            <div 
+              className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary/50 transition-colors cursor-pointer"
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <Icon icon="mdi:cloud-upload" className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground mb-4">
+                Drag and drop your photos here, or click to select
+              </p>
+              <Button
+                variant="outline"
+                disabled={files.length >= 5}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  fileInputRef.current?.click();
+                }}
+              >
+                <Icon icon="mdi:folder-open" className="w-4 h-4 mr-2" />
+                Select Photos
+              </Button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+              <p className="text-xs text-muted-foreground mt-2">
+                {files.length}/5 files selected (max 10MB each)
+              </p>
+            </div>
+
+            {/* File Previews */}
+            {files.length > 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {files.map((uploadedFile) => (
+                  <div key={uploadedFile.id} className="relative group">
+                    <img
+                      src={uploadedFile.preview}
+                      alt="Preview"
+                      className="w-full h-24 object-cover rounded-lg"
+                    />
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => removeFile(uploadedFile.id)}
+                    >
+                      <Icon icon="mdi:close" className="w-3 h-3" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Memory Details */}
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="title" className="text-foreground">Title *</Label>
+              <Input
+                id="title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Enter memory title"
+                className="bg-background border-border text-foreground"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="description" className="text-foreground">Description</Label>
+              <Textarea
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Describe your memory..."
+                className="bg-background border-border text-foreground"
+                rows={3}
+              />
+            </div>
+
+            <div>
+              <Label className="text-foreground">Category</Label>
+              <div className="flex gap-2 mt-2">
+                <Button
+                  variant={category === 'Memory' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setCategory('Memory')}
+                >
+                  Memory
+                </Button>
+                <Button
+                  variant={category === 'Activity' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setCategory('Activity')}
+                >
+                  Activity
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="blackWhite"
+                checked={isBlackWhite}
+                onChange={(e) => setIsBlackWhite(e.target.checked)}
+                className="rounded border-border"
+              />
+              <Label htmlFor="blackWhite" className="text-foreground">
+                Convert to black & white
+              </Label>
+            </div>
+          </div>
+
+          {/* Upload Progress */}
+          {isUploading && (
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm text-muted-foreground">
+                <span>Uploading...</span>
+                <span>{uploadProgress}%</span>
+              </div>
+              <div className="w-full bg-secondary rounded-full h-2">
+                <div 
+                  className="bg-primary h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${uploadProgress}%` }}
+                ></div>
+              </div>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div className="flex gap-4 pt-4">
+            <Button
+              onClick={handleUpload}
+              disabled={isUploading || files.length === 0 || !title.trim()}
+              className="flex-1"
+            >
+              {isUploading ? (
+                <>
+                  <Icon icon="mdi:loading" className="w-4 h-4 mr-2 animate-spin" />
+                  Uploading... ({uploadProgress}%)
+                </>
+              ) : (
+                <>
+                  <Icon icon="mdi:upload" className="w-4 h-4 mr-2" />
+                  Upload Memory
+                </>
+              )}
+            </Button>
+            <Button variant="outline" onClick={onClose} disabled={isUploading}>
+              Cancel
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
