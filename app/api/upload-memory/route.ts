@@ -41,19 +41,20 @@ export async function POST(request: NextRequest) {
     
     for (const file of files) {
       try {
-        const buffer = Buffer.from(await file.arrayBuffer());
+        const arrayBuffer = await file.arrayBuffer();
+        const uint8Array = new Uint8Array(arrayBuffer);
         
-        let processedBuffer = buffer;
+        let processedBuffer = uint8Array;
         
         // Process with Sharp if black & white is requested
         if (isBlackWhite) {
-          processedBuffer = await sharp(buffer as Buffer<ArrayBuffer>)
+          processedBuffer = await sharp(uint8Array)
             .resize(1920, 1080, { fit: 'inside', withoutEnlargement: true })
             .grayscale()
             .jpeg({ quality: 80 })
             .toBuffer();
         } else {
-          processedBuffer = await sharp(buffer as Buffer<ArrayBuffer>)
+          processedBuffer = await sharp(uint8Array)
             .resize(1920, 1080, { fit: 'inside', withoutEnlargement: true })
             .jpeg({ quality: 80 })
             .toBuffer();
