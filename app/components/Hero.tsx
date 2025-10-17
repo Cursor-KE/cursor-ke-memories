@@ -4,6 +4,13 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@iconify/react';
 
+/**
+ * Hero Component
+ * 
+ * Main landing section showcasing the Cursor Kenya community.
+ * Displays community branding, key stats, and feature highlights.
+ * Responsive design with gradient accents and animated elements.
+ */
 export default function Hero() {
   return (
     <section className="relative min-h-screen bg-background overflow-hidden">
@@ -30,7 +37,7 @@ export default function Hero() {
               </h1>
             </div>
             
-            {/* Description */}
+            {/* Description text highlighting community values */}
             <p className="text-lg md:text-xl text-gray-300 leading-relaxed max-w-2xl">
               Join Kenya's premier AI-powered development community. Connect with fellow developers, 
               share knowledge, and build the future together through meetups, hackathons, and collaborative projects.
