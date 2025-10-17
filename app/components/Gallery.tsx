@@ -39,14 +39,14 @@ export default function Gallery() {
   };
 
   return (
-    <section className="py-20 px-4">
+    <section id="gallery-section" className="py-20 px-4">
       <div className="container mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-            Memories
+            Community Memories
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto mb-8">
-            Celebrating our journey and achievements
+            Celebrating our Cursor Kenya community journey, achievements, and shared moments
           </p>
           
           <Button 
@@ -54,20 +54,20 @@ export default function Gallery() {
             className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 text-lg font-semibold"
           >
             <Icon icon="mdi:camera-plus" className="w-5 h-5 mr-2" />
-            Want to add your cursor memory?
+            Share your Cursor KE community memory
           </Button>
         </div>
 
         {loading ? (
           <div className="flex justify-center items-center py-20">
             <Icon icon="mdi:loading" className="w-8 h-8 animate-spin text-primary" />
-            <span className="ml-2 text-muted-foreground">Loading memories...</span>
+            <span className="ml-2 text-muted-foreground">Loading community memories...</span>
           </div>
         ) : memories.length === 0 ? (
           <div className="text-center py-20">
             <Icon icon="mdi:image-outline" className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground text-lg">No memories yet</p>
-            <p className="text-muted-foreground text-sm">Be the first to share a memory!</p>
+            <p className="text-muted-foreground text-lg">No community memories yet</p>
+            <p className="text-muted-foreground text-sm">Be the first to share a Cursor KE memory!</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
