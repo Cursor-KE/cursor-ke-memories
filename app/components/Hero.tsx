@@ -19,7 +19,7 @@ export default function Hero() {
               </Badge>
             </div>
             
-            {/* Main Headline */}
+            
             <div>
               <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6">
                 Cursor Kenya{' '}
