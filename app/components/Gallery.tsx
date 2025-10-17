@@ -105,6 +105,24 @@ export default function Gallery() {
                       Click to view
                     </div>
                   </div>
+                  
+                  {/* Share button */}
+                  <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      className="bg-black/50 text-white hover:bg-black/70"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const shareText = encodeURIComponent("I'M at a cursor Kenya meet up @cursor @blackie_360");
+                        const shareUrl = encodeURIComponent(window.location.href);
+                        window.open(`https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}`, '_blank');
+                      }}
+                    >
+                      <Icon icon="mdi:share" className="w-4 h-4 mr-1" />
+                      Share
+                    </Button>
+                  </div>
                 </div>
                 
                 <CardContent className="p-3">

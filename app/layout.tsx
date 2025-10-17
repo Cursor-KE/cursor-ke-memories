@@ -15,6 +15,28 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Cursor KE",
   description: "Cursor KE Memories - Building the future with AI-powered development",
+  openGraph: {
+    title: "Cursor KE Community",
+    description: "Join Kenya's premier AI-powered development community. Share memories from meetups and hackathons.",
+    url: "https://cursor-ke.vercel.app",
+    siteName: "Cursor KE",
+    images: [
+      {
+        url: "/og-image.svg",
+        width: 1200,
+        height: 630,
+        alt: "Cursor KE Community",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Cursor KE Community",
+    description: "Join Kenya's premier AI-powered development community.",
+    images: ["/og-image.svg"],
+  },
 };
 
 export default function RootLayout({

@@ -1,0 +1,50 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#1a1a1a"/>
+  
+  <!-- Logo -->
+  <g transform="translate(100, 100)">
+    <rect width="80" height="80" rx="12" fill="#000000"/>
+    <path d="M20 20L40 10L60 20V40L40 50L20 40V20Z" fill="white"/>
+    <path d="M30 25L40 20L50 25V35L40 40L30 35V25Z" fill="#000000"/>
+    <circle cx="40" cy="30" r="3" fill="white"/>
+    <path d="M40 35L50 30V40L40 45L30 40V30L40 35Z" fill="white"/>
+  </g>
+  
+  <!-- Title -->
+  <text x="200" y="150" font-family="Inter, sans-serif" font-size="72" font-weight="bold" fill="white">
+    Cursor KE Community
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="200" y="220" font-family="Inter, sans-serif" font-size="32" fill="#cccccc">
+    Join Kenya's premier AI-powered development community
+  </text>
+  
+  <!-- Description -->
+  <text x="200" y="280" font-family="Inter, sans-serif" font-size="24" fill="#999999">
+    Share memories from meetups and hackathons
+  </text>
+  
+  <!-- Features -->
+  <g transform="translate(200, 350)">
+    <g transform="translate(0, 0)">
+      <circle cx="20" cy="20" r="15" fill="#007AFF" opacity="0.2"/>
+      <text x="50" y="28" font-family="Inter, sans-serif" font-size="20" fill="white">500+ Developers</text>
+    </g>
+    <g transform="translate(0, 60)">
+      <circle cx="20" cy="20" r="15" fill="#007AFF" opacity="0.2"/>
+      <text x="50" y="28" font-family="Inter, sans-serif" font-size="20" fill="white">Monthly Meetups</text>
+    </g>
+    <g transform="translate(0, 120)">
+      <circle cx="20" cy="20" r="15" fill="#007AFF" opacity="0.2"/>
+      <text x="50" y="28" font-family="Inter, sans-serif" font-size="20" fill="white">AI-Powered Coding</text>
+    </g>
+  </g>
+  
+  <!-- Bottom accent -->
+  <rect x="0" y="580" width="1200" height="50" fill="#007AFF" opacity="0.1"/>
+  <text x="100" y="610" font-family="Inter, sans-serif" font-size="18" fill="#007AFF">
+    cursor-ke.vercel.app
+  </text>
+</svg>
