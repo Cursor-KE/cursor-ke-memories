@@ -2,12 +2,11 @@
   "buildCommand": "pnpm run build",
   "installCommand": "pnpm install",
   "framework": "nextjs",
-  "nodejs": "20.x",
   "functions": {
     "app/api/**/*.ts": {
       "runtime": "nodejs20.x",
       "memory": 3008,
-      "timeout": 60
+      "maxDuration": 60
     }
   }
 }
