@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
         const arrayBuffer = await file.arrayBuffer();
         const uint8Array = new Uint8Array(arrayBuffer);
         
-        let processedBuffer = uint8Array;
+        let processedBuffer: Buffer;
         
         // Process with Sharp if black & white is requested
         if (isBlackWhite) {
