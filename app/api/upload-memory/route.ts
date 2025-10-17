@@ -3,11 +3,16 @@ import { supabase, MemoryInsert } from '@/lib/supabase';
 import { uploadToCloudinary } from '@/lib/cloudinary';
 import sharp from 'sharp';
 
-// Increase timeout for large uploads
-export const maxDuration = 60; // 60 seconds
+// Route segment config
+export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
 export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
+  console.log('=== Upload Memory Route Called ===');
+  console.log('Method:', request.method);
+  console.log('URL:', request.url);
+  
   try {
     const formData = await request.formData();
     
