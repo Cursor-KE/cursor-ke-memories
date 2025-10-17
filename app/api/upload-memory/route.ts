@@ -47,13 +47,13 @@ export async function POST(request: NextRequest) {
         
         // Process with Sharp if black & white is requested
         if (isBlackWhite) {
-          processedBuffer = await sharp(buffer)
+          processedBuffer = await sharp(buffer as Buffer<ArrayBuffer>)
             .resize(1920, 1080, { fit: 'inside', withoutEnlargement: true })
             .grayscale()
             .jpeg({ quality: 80 })
             .toBuffer();
         } else {
-          processedBuffer = await sharp(buffer)
+          processedBuffer = await sharp(buffer as Buffer<ArrayBuffer>)
             .resize(1920, 1080, { fit: 'inside', withoutEnlargement: true })
             .jpeg({ quality: 80 })
             .toBuffer();
