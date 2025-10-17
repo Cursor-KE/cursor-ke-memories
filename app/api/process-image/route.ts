@@ -30,7 +30,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Return the processed image
-    return new NextResponse(processedBuffer, {
+    return new NextResponse(processedBuffer.buffer.slice(
+      processedBuffer.byteOffset,
+      processedBuffer.byteOffset + processedBuffer.byteLength
+    ), {
       headers: {
         'Content-Type': 'image/jpeg',
         'Content-Length': processedBuffer.length.toString(),
