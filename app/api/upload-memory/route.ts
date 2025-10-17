@@ -62,15 +62,15 @@ export async function POST(request: NextRequest) {
         
         // Upload to Cloudinary with timeout
         const uploadPromise = uploadToCloudinary(processedBuffer);
-        const timeoutPromise = new Promise((_, reject) => 
+        const timeoutPromise = new Promise<never>((_, reject) => 
           setTimeout(() => reject(new Error('Upload timeout')), 30000)
         );
         
-        const imageUrl = await Promise.race([uploadPromise, timeoutPromise]) as string;
+        const imageUrl = await Promise.race([uploadPromise, timeoutPromise]);
         imageUrls.push(imageUrl);
         
       } catch (error) {
-        console.error(`Error processing file ${file.name}:`, error);
+        console.error(`Error processing file ${file.name}:`, error instanceof Error ? error.message : error);
         // Continue with other files instead of failing completely
         continue;
       }
@@ -107,7 +107,8 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Upload error:', error);
-    return NextResponse.json({ error: 'Upload failed' }, { status: 500 });
+    console.error('Upload error:', error instanceof Error ? error.message : String(error));
+    console.error('Full error:', error);
+    return NextResponse.json({ error: 'Upload failed', details: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
   }
 }

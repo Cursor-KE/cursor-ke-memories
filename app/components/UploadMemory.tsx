@@ -120,10 +120,18 @@ export default function UploadMemory({ onClose, onSuccess }: UploadMemoryProps) 
       clearInterval(progressInterval);
       setUploadProgress(100);
 
-      const result = await response.json();
+      let result;
+      try {
+        result = await response.json();
+      } catch (jsonError) {
+        console.error('Failed to parse response as JSON:', jsonError);
+        console.error('Response status:', response.status);
+        console.error('Response statusText:', response.statusText);
+        throw new Error(`Server error: ${response.status} ${response.statusText}`);
+      }
 
       if (!response.ok) {
-        throw new Error(result.error || 'Upload failed');
+        throw new Error(result?.error || result?.details || 'Upload failed');
       }
 
       alert('Memory uploaded successfully!');
