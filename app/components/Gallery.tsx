@@ -106,8 +106,9 @@ export default function Gallery() {
                       className="bg-black/50 text-white hover:bg-black/70"
                       onClick={(e) => {
                         e.stopPropagation();
-                        const imageUrl = encodeURIComponent(memory.images?.[0] || '');
-                        const shareText = encodeURIComponent(`Check out this moment from Cursor Kenya! 🇰🇪 @cursor_ai\n\n${memory.images?.[0] || window.location.href}`);
+                        // Share the image URL directly - X will display it as a preview
+                        const imageUrl = memory.images?.[0] || '';
+                        const shareText = encodeURIComponent(`Check out this moment from Cursor Kenya! 🇰🇪 @cursor_ai\n\n${imageUrl}`);
                         window.open(`https://twitter.com/intent/tweet?text=${shareText}`, '_blank');
                       }}
                     >
