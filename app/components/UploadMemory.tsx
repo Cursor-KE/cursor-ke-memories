@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -37,14 +38,14 @@ export default function UploadMemory({ onClose, onSuccess }: UploadMemoryProps) 
 
   const addFiles = (selectedFiles: File[]) => {
     if (files.length + selectedFiles.length > 5) {
-      alert('Maximum 5 files allowed');
+      toast.error('Maximum 5 files allowed');
       return;
     }
 
     // Check file sizes (max 10MB per file)
     const oversizedFiles = selectedFiles.filter(file => file.size > 10 * 1024 * 1024);
     if (oversizedFiles.length > 0) {
-      alert(`Some files are too large (max 10MB each). Please compress them first.`);
+      toast.error(`Some files are too large (max 10MB each). Please compress them first.`);
       return;
     }
 
@@ -81,7 +82,7 @@ export default function UploadMemory({ onClose, onSuccess }: UploadMemoryProps) 
 
   const handleUpload = async () => {
     if (files.length === 0 || !title.trim()) {
-      alert('Please select files and add a title');
+      toast.error('Please select files and add a title');
       return;
     }
 
@@ -134,7 +135,7 @@ export default function UploadMemory({ onClose, onSuccess }: UploadMemoryProps) 
         throw new Error(result?.error || result?.details || 'Upload failed');
       }
 
-      alert('Memory uploaded successfully!');
+      toast.success('Memory uploaded successfully!');
       
       // Reset form
       setFiles([]);
@@ -153,9 +154,9 @@ export default function UploadMemory({ onClose, onSuccess }: UploadMemoryProps) 
     } catch (error) {
       console.error('Upload error:', error);
       if (error instanceof Error && error.name === 'AbortError') {
-        alert('Upload timed out. Please try with smaller images or fewer files.');
+        toast.error('Upload timed out. Please try with smaller images or fewer files.');
       } else {
-        alert(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        toast.error(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
     } finally {
       setIsUploading(false);
