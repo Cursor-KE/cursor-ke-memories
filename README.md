@@ -2,7 +2,7 @@
 
 A modern web application for Kenya's premier AI-powered development community, built with **Next.js 15**, **TypeScript**, and optimized for serverless deployment with **Vercel**.
 
-🌍 **Live Demo:** [https://cursorke.vercel.app](https://cursorke.vercel.app)
+🌍 **Live Demo:** [https://hackimage.vercel.app/](https://hackimage.vercel.app/)
 
 ## 📋 Features
 
