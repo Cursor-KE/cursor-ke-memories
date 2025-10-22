@@ -164,31 +164,32 @@ export default function UploadMemory({ onClose, onSuccess }: UploadMemoryProps) 
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 md:p-4">
       <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-card border-border">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-2xl text-foreground">Add Your Cursor Memory</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between gap-2">
+          <CardTitle className="text-xl md:text-2xl text-foreground">Add Your Cursor Memory</CardTitle>
           <Button variant="ghost" size="sm" onClick={onClose}>
-            <Icon icon="mdi:close" className="w-5 h-5" />
+            <Icon icon="mdi:close" className="w-4 md:w-5 h-4 md:h-5" />
           </Button>
         </CardHeader>
 
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-4 md:space-y-6">
           {/* File Upload */}
           <div className="space-y-4">
-            <Label className="text-foreground">Photos (up to 5)</Label>
+            <Label className="text-foreground text-sm md:text-base">Photos (up to 5)</Label>
             <div 
-              className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary/50 transition-colors cursor-pointer"
+              className="border-2 border-dashed border-border rounded-lg p-4 md:p-8 text-center hover:border-primary/50 transition-colors cursor-pointer"
               onDragOver={handleDragOver}
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
             >
-              <Icon icon="mdi:cloud-upload" className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground mb-4">
+              <Icon icon="mdi:cloud-upload" className="w-8 md:w-12 h-8 md:h-12 text-muted-foreground mx-auto mb-2 md:mb-4" />
+              <p className="text-xs md:text-base text-muted-foreground mb-2 md:mb-4">
                 Drag and drop your photos here, or click to select
               </p>
               <Button
                 variant="outline"
+                size="sm"
                 disabled={files.length >= 5}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -311,11 +312,11 @@ export default function UploadMemory({ onClose, onSuccess }: UploadMemoryProps) 
           )}
 
           {/* Action Buttons */}
-          <div className="flex gap-4 pt-4">
+          <div className="flex gap-2 md:gap-4 pt-4 flex-col md:flex-row">
             <Button
               onClick={handleUpload}
               disabled={isUploading || files.length === 0 || !title.trim()}
-              className="flex-1"
+              className="flex-1 text-sm md:text-base"
             >
               {isUploading ? (
                 <>
@@ -329,7 +330,7 @@ export default function UploadMemory({ onClose, onSuccess }: UploadMemoryProps) 
                 </>
               )}
             </Button>
-            <Button variant="outline" onClick={onClose} disabled={isUploading}>
+            <Button variant="outline" onClick={onClose} disabled={isUploading} className="text-sm md:text-base">
               Cancel
             </Button>
           </div>

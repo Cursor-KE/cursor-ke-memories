@@ -70,12 +70,12 @@ export default function Gallery() {
             <p className="text-muted-foreground text-sm">Be the first to share a Cursor KE memory!</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {memories.map((memory) => (
               <Card key={memory.id} className="award-glow bg-card border-border hover:border-primary/50 transition-all duration-300 cursor-pointer group overflow-hidden">
                 {/* Event Photo */}
                 <div 
-                  className="relative h-80 overflow-hidden cursor-pointer"
+                  className="relative h-48 md:h-64 lg:h-80 overflow-hidden cursor-pointer"
                   onClick={() => memory.images && memory.images.length > 0 && setSelectedImage({ url: memory.images[0], title: memory.title })}
                 >
                   {memory.images && memory.images.length > 0 ? (
@@ -157,7 +157,7 @@ export default function Gallery() {
       {/* Image Modal */}
       {selectedImage && (
         <div 
-          className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-2 md:p-4"
           onClick={() => setSelectedImage(null)}
         >
           <div className="relative max-w-4xl max-h-[90vh] w-full">
@@ -165,10 +165,10 @@ export default function Gallery() {
             <Button
               variant="ghost"
               size="sm"
-              className="absolute -top-12 right-0 text-white hover:bg-white/20"
+              className="absolute -top-10 md:-top-12 right-0 text-white hover:bg-white/20 z-10"
               onClick={() => setSelectedImage(null)}
             >
-              <Icon icon="mdi:close" className="w-6 h-6" />
+              <Icon icon="mdi:close" className="w-5 md:w-6 h-5 md:h-6" />
             </Button>
             
             {/* Image */}
