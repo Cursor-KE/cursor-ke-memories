@@ -98,14 +98,6 @@ export default function Gallery() {
                     </div>
                   )}
                   
-                  {/* Click to view indicator */}
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <div className="bg-black/50 text-white px-3 py-1 rounded-full text-sm">
-                      <Icon icon="mdi:eye" className="w-4 h-4 inline mr-1" />
-                      Click to view
-                    </div>
-                  </div>
-                  
                   {/* Share button */}
                   <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <Button
@@ -186,10 +178,7 @@ export default function Gallery() {
               onClick={(e) => e.stopPropagation()}
             />
             
-            {/* Title */}
-            <div className="absolute bottom-4 left-4 right-4 bg-black/50 text-white p-3 rounded-lg">
-              <h3 className="text-lg font-semibold">{selectedImage.title}</h3>
-            </div>
+            {/* Title - REMOVED */}
           </div>
         </div>
       )}
