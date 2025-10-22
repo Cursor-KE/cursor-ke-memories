@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import sharp from 'sharp';
+import { uploadToCloudinary, getTransformedImageUrl } from '@/lib/cloudinary';
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,33 +11,33 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
+    // Convert file to buffer
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
     
-    let processedBuffer: Buffer;
+    // Upload to Cloudinary - all processing (resize, quality, grayscale) happens on Cloudinary servers
+    const uploadUrl = await uploadToCloudinary(buffer, 'cursor-ke-process', {
+      isBlackWhite,
+    });
 
-    if (isBlackWhite) {
-      // Convert to black and white using Sharp
-      processedBuffer = await sharp(buffer)
-        .grayscale()
-        .jpeg({ quality: 90 })
-        .toBuffer();
-    } else {
-      // Just optimize the image
-      processedBuffer = await sharp(buffer)
-        .jpeg({ quality: 90 })
-        .toBuffer();
-    }
+    // Return the Cloudinary URL with optional transformations applied
+    const transformedUrl = getTransformedImageUrl(uploadUrl, {
+      width: 1920,
+      height: 1080,
+      isBlackWhite,
+      quality: 'auto',
+    });
 
-    // Return the processed image
-    return new NextResponse(new Uint8Array(processedBuffer), {
-      headers: {
-        'Content-Type': 'image/jpeg',
-        'Content-Length': processedBuffer.length.toString(),
-      },
+    return NextResponse.json({
+      success: true,
+      url: transformedUrl,
+      originalUrl: uploadUrl,
     });
   } catch (error) {
     console.error('Image processing error:', error);
-    return NextResponse.json({ error: 'Image processing failed' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Image processing failed', details: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
+    );
   }
 }
