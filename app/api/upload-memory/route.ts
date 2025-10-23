@@ -42,9 +42,11 @@ export async function POST(request: NextRequest) {
 
     // Upload images directly to Cloudinary (processing done on their servers)
     const imageUrls: string[] = [];
+    const uploadErrors: string[] = [];
     
     for (const file of files) {
       try {
+        console.log(`Processing file: ${file.name}, size: ${file.size} bytes`);
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
         
@@ -60,16 +62,23 @@ export async function POST(request: NextRequest) {
         
         const imageUrl = await Promise.race([uploadPromise, timeoutPromise]);
         imageUrls.push(imageUrl);
+        console.log(`Successfully uploaded ${file.name}: ${imageUrl}`);
         
       } catch (error) {
-        console.error(`Error uploading file ${file.name}:`, error instanceof Error ? error.message : error);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        console.error(`Error uploading file ${file.name}:`, errorMessage);
+        uploadErrors.push(`${file.name}: ${errorMessage}`);
         // Continue with other files instead of failing completely
         continue;
       }
     }
     
     if (imageUrls.length === 0) {
-      return NextResponse.json({ error: 'No images were successfully uploaded' }, { status: 400 });
+      console.error('No images were successfully uploaded. Errors:', uploadErrors);
+      return NextResponse.json({ 
+        error: 'No images were successfully uploaded',
+        details: uploadErrors.length > 0 ? uploadErrors : 'Unknown error'
+      }, { status: 400 });
     }
 
     // Save to Supabase

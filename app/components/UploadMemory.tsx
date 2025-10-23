@@ -132,7 +132,11 @@ export default function UploadMemory({ onClose, onSuccess }: UploadMemoryProps) 
       }
 
       if (!response.ok) {
-        throw new Error(result?.error || result?.details || 'Upload failed');
+        const errorMessage = result?.error || result?.details || 'Upload failed';
+        const details = Array.isArray(result?.details) 
+          ? result.details.join(', ') 
+          : result?.details;
+        throw new Error(`${errorMessage}${details ? `: ${details}` : ''}`);
       }
 
       toast.success('Memory uploaded successfully!');

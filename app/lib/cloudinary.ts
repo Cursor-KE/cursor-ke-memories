@@ -9,6 +9,19 @@ cloudinary.config({
 
 export { cloudinary };
 
+// Verify Cloudinary configuration
+function verifyCloudinaryConfig() {
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+  const apiKey = process.env.CLOUDINARY_API_KEY;
+  const apiSecret = process.env.CLOUDINARY_API_SECRET;
+
+  if (!cloudName || !apiKey || !apiSecret) {
+    throw new Error('Cloudinary credentials are not configured. Please set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET environment variables.');
+  }
+
+  return true;
+}
+
 /**
  * Upload image to Cloudinary with responsive transformations
  * Uses eager transformations to generate optimized variants on-server
@@ -18,6 +31,9 @@ export async function uploadToCloudinary(
   folder: string = 'cursor-ke-memories',
   options: { isBlackWhite?: boolean } = {}
 ): Promise<string> {
+  // Verify Cloudinary configuration
+  verifyCloudinaryConfig();
+
   return new Promise((resolve, reject) => {
     const uploadOptions: any = {
       folder,
@@ -25,35 +41,22 @@ export async function uploadToCloudinary(
       quality: 'auto',
       fetch_format: 'auto',
       timeout: 60000,
-      // Eager transformations are processed server-side on upload
-      eager: [
-        // Thumbnail (optimized)
-        {
-          width: 400,
-          height: 300,
-          crop: 'limit',
-          fetch_format: 'auto',
-          quality: 'auto',
-          ...(options.isBlackWhite && { effect: 'grayscale' }),
-        },
-        // Medium size
-        {
-          width: 800,
-          height: 600,
-          crop: 'limit',
-          fetch_format: 'auto',
-          quality: 'auto',
-          ...(options.isBlackWhite && { effect: 'grayscale' }),
-        },
-      ],
-      eager_async: true,
+      // Apply black & white effect if requested
+      ...(options.isBlackWhite && { effect: 'grayscale' }),
     };
+
+    console.log('Uploading to Cloudinary with options:', {
+      folder,
+      isBlackWhite: options.isBlackWhite,
+      fileSize: file.length,
+    });
 
     const stream = cloudinary.uploader.upload_stream(uploadOptions, (error, result) => {
       if (error) {
         console.error('Cloudinary upload error:', error);
         reject(error);
       } else if (result) {
+        console.log('Cloudinary upload successful:', result.secure_url);
         resolve(result.secure_url);
       } else {
         reject(new Error('No result from Cloudinary'));
