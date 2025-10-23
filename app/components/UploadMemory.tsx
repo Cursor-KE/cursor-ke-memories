@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Icon } from '@iconify/react';
 
 interface UploadMemoryProps {
@@ -81,8 +82,8 @@ export default function UploadMemory({ onClose, onSuccess }: UploadMemoryProps) 
   };
 
   const handleUpload = async () => {
-    if (files.length === 0 || !title.trim()) {
-      toast.error('Please select files and add a title');
+    if (files.length === 0 || !title) {
+      toast.error('Please select files and choose a title');
       return;
     }
 
@@ -246,14 +247,49 @@ export default function UploadMemory({ onClose, onSuccess }: UploadMemoryProps) 
           {/* Memory Details */}
           <div className="space-y-4">
             <div>
-              <Label htmlFor="title" className="text-foreground">Title *</Label>
-              <Input
-                id="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Enter memory title"
-                className="bg-background border-border text-foreground"
-              />
+              <Label className="text-foreground mb-3 block">Title *</Label>
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="title-1" 
+                    checked={title === 'Cursor meetup #1'}
+                    onCheckedChange={(checked) => checked && setTitle('Cursor meetup #1')}
+                  />
+                  <Label htmlFor="title-1" className="text-foreground cursor-pointer">
+                    Cursor meetup #1
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="title-2" 
+                    checked={title === 'cursor meetup Nakuru'}
+                    onCheckedChange={(checked) => checked && setTitle('cursor meetup Nakuru')}
+                  />
+                  <Label htmlFor="title-2" className="text-foreground cursor-pointer">
+                    cursor meetup Nakuru
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="title-3" 
+                    checked={title === 'cursor hack X makewave'}
+                    onCheckedChange={(checked) => checked && setTitle('cursor hack X makewave')}
+                  />
+                  <Label htmlFor="title-3" className="text-foreground cursor-pointer">
+                    cursor hack X makewave
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="title-4" 
+                    checked={title === 'cursor halloween hacks X payhero'}
+                    onCheckedChange={(checked) => checked && setTitle('cursor halloween hacks X payhero')}
+                  />
+                  <Label htmlFor="title-4" className="text-foreground cursor-pointer">
+                    cursor halloween hacks X payhero
+                  </Label>
+                </div>
+              </div>
             </div>
 
             <div>
@@ -322,7 +358,7 @@ export default function UploadMemory({ onClose, onSuccess }: UploadMemoryProps) 
           <div className="flex gap-2 md:gap-4 pt-4 flex-col md:flex-row">
             <Button
               onClick={handleUpload}
-              disabled={isUploading || files.length === 0 || !title.trim()}
+              disabled={isUploading || files.length === 0 || !title}
               className="flex-1 text-xs md:text-base py-2 md:py-3"
             >
               {isUploading ? (
