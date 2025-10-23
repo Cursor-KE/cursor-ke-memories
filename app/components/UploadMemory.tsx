@@ -52,7 +52,9 @@ export default function UploadMemory({ onClose, onSuccess }: UploadMemoryProps) 
     }
 
     // Check total size (max 4MB total to stay under Vercel limit)
-    const totalSize = [...files, ...selectedFiles].reduce((sum, file) => sum + file.size, 0);
+    const existingFilesSize = files.reduce((sum, item) => sum + item.file.size, 0);
+    const newFilesSize = selectedFiles.reduce((sum, file) => sum + file.size, 0);
+    const totalSize = existingFilesSize + newFilesSize;
     if (totalSize > 4 * 1024 * 1024) {
       const totalSizeMB = (totalSize / (1024 * 1024)).toFixed(1);
       toast.error(`Total file size is ${totalSizeMB}MB (exceeds 4MB limit). Please select fewer or smaller files.`);
