@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { toast } from 'sonner';
+import imageCompression from 'browser-image-compression';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -22,6 +23,24 @@ interface UploadedFile {
   id: string;
 }
 
+// Helper function to compress images
+const compressImage = async (file: File): Promise<File> => {
+  const options = {
+    maxSizeMB: 0.5, // Compress to max 500KB
+    maxWidthOrHeight: 1920, // Max width or height
+    useWebWorker: true,
+    quality: 0.8 // Image quality (0-1)
+  };
+
+  try {
+    const compressedFile = await imageCompression(file, options);
+    return compressedFile;
+  } catch (error) {
+    console.error('Compression error:', error);
+    return file; // Return original if compression fails
+  }
+};
+
 export default function UploadMemory({ onClose, onSuccess }: UploadMemoryProps) {
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [title, setTitle] = useState('');
@@ -32,54 +51,69 @@ export default function UploadMemory({ onClose, onSuccess }: UploadMemoryProps) 
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(event.target.files || []);
-    addFiles(selectedFiles);
+    await addFiles(selectedFiles);
   };
 
-  const addFiles = (selectedFiles: File[]) => {
+  const addFiles = async (selectedFiles: File[]) => {
     if (files.length + selectedFiles.length > 5) {
       toast.error('Maximum 5 files allowed');
       return;
     }
 
-    // Check file sizes (max 3MB per file to stay under Vercel's 4.5MB limit)
+    // Show compression toast for large files
     const oversizedFiles = selectedFiles.filter(file => file.size > 3 * 1024 * 1024);
     if (oversizedFiles.length > 0) {
-      const fileSizeMB = (oversizedFiles[0].size / (1024 * 1024)).toFixed(1);
-      toast.error(`File "${oversizedFiles[0].name}" is too large (${fileSizeMB}MB). Maximum allowed is 3MB per file. Tip: Compress images using tools like TinyPNG or ImageOptim before uploading.`);
-      return;
+      toast.info(`Compressing ${oversizedFiles.length} large image(s)...`);
     }
 
-    // Check total size (max 4MB total to stay under Vercel limit)
+    // Compress files that need it
+    const processedFiles: File[] = [];
+    for (const file of selectedFiles) {
+      if (file.size > 3 * 1024 * 1024) {
+        // Compress files larger than 3MB
+        const compressed = await compressImage(file);
+        processedFiles.push(compressed);
+      } else {
+        processedFiles.push(file);
+      }
+    }
+
+    // Check total size after compression
     const existingFilesSize = files.reduce((sum, item) => sum + item.file.size, 0);
-    const newFilesSize = selectedFiles.reduce((sum, file) => sum + file.size, 0);
+    const newFilesSize = processedFiles.reduce((sum, file) => sum + file.size, 0);
     const totalSize = existingFilesSize + newFilesSize;
+    
     if (totalSize > 4 * 1024 * 1024) {
       const totalSizeMB = (totalSize / (1024 * 1024)).toFixed(1);
-      toast.error(`Total file size is ${totalSizeMB}MB (exceeds 4MB limit). Please select fewer or smaller files.`);
+      toast.error(`Total file size is ${totalSizeMB}MB (exceeds 4MB limit). Please select fewer files.`);
       return;
     }
 
-    const newFiles: UploadedFile[] = selectedFiles.map(file => ({
+    const newFiles: UploadedFile[] = processedFiles.map(file => ({
       file,
       preview: URL.createObjectURL(file),
       id: Math.random().toString(36).substr(2, 9)
     }));
 
     setFiles(prev => [...prev, ...newFiles]);
+    
+    if (oversizedFiles.length > 0) {
+      toast.success('Images compressed successfully!');
+    }
   };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     const droppedFiles = Array.from(e.dataTransfer.files).filter(file => 
       file.type.startsWith('image/')
     );
-    addFiles(droppedFiles);
+    await addFiles(droppedFiles);
   };
 
   const removeFile = (id: string) => {
