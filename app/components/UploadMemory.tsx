@@ -43,10 +43,19 @@ export default function UploadMemory({ onClose, onSuccess }: UploadMemoryProps) 
       return;
     }
 
-    // Check file sizes (max 10MB per file)
-    const oversizedFiles = selectedFiles.filter(file => file.size > 10 * 1024 * 1024);
+    // Check file sizes (max 3MB per file to stay under Vercel's 4.5MB limit)
+    const oversizedFiles = selectedFiles.filter(file => file.size > 3 * 1024 * 1024);
     if (oversizedFiles.length > 0) {
-      toast.error(`Some files are too large (max 10MB each). Please compress them first.`);
+      const fileSizeMB = (oversizedFiles[0].size / (1024 * 1024)).toFixed(1);
+      toast.error(`File "${oversizedFiles[0].name}" is too large (${fileSizeMB}MB). Maximum allowed is 3MB per file. Tip: Compress images using tools like TinyPNG or ImageOptim before uploading.`);
+      return;
+    }
+
+    // Check total size (max 4MB total to stay under Vercel limit)
+    const totalSize = [...files, ...selectedFiles].reduce((sum, file) => sum + file.size, 0);
+    if (totalSize > 4 * 1024 * 1024) {
+      const totalSizeMB = (totalSize / (1024 * 1024)).toFixed(1);
+      toast.error(`Total file size is ${totalSizeMB}MB (exceeds 4MB limit). Please select fewer or smaller files.`);
       return;
     }
 
@@ -160,6 +169,8 @@ export default function UploadMemory({ onClose, onSuccess }: UploadMemoryProps) 
       console.error('Upload error:', error);
       if (error instanceof Error && error.name === 'AbortError') {
         toast.error('Upload timed out. Please try with smaller images or fewer files.');
+      } else if (error instanceof Error && error.message.includes('413')) {
+        toast.error('Files are too large. Maximum 3MB per file, 4MB total. Please compress images or select fewer files.');
       } else {
         toast.error(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
@@ -216,7 +227,7 @@ export default function UploadMemory({ onClose, onSuccess }: UploadMemoryProps) 
                 className="hidden"
               />
               <p className="text-xs text-muted-foreground mt-2">
-                {files.length}/5 files selected (max 10MB each)
+                {files.length}/5 files selected (max 3MB each, 4MB total)
               </p>
             </div>
 
