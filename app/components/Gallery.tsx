@@ -51,10 +51,11 @@ export default function Gallery() {
           
           <Button 
             onClick={() => setShowUpload(true)}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 text-lg font-semibold"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 md:px-8 py-2 md:py-3 text-sm md:text-lg font-semibold w-full md:w-auto"
           >
-            <Icon icon="mdi:camera-plus" className="w-5 h-5 mr-2" />
-            Share your Cursor KE community memory
+            <Icon icon="mdi:camera-plus" className="w-4 h-4 md:w-5 md:h-5 mr-2" />
+            <span className="hidden sm:inline">Share your Cursor KE community memory</span>
+            <span className="sm:hidden">Share Memory</span>
           </Button>
         </div>
 
@@ -103,7 +104,7 @@ export default function Gallery() {
                     <Button
                       size="sm"
                       variant="secondary"
-                      className="bg-black/50 text-white hover:bg-black/70"
+                      className="bg-black/50 text-white hover:bg-black/70 text-xs md:text-sm"
                       onClick={(e) => {
                         e.stopPropagation();
                         // Share the image URL directly - X will display it as a preview
@@ -112,8 +113,8 @@ export default function Gallery() {
                         window.open(`https://twitter.com/intent/tweet?text=${shareText}`, '_blank');
                       }}
                     >
-                      <Icon icon="mdi:share" className="w-4 h-4 mr-1" />
-                      Share
+                      <Icon icon="mdi:share" className="w-3 h-3 md:w-4 md:h-4 mr-1" />
+                      <span className="hidden md:inline">Share</span>
                     </Button>
                   </div>
                 </div>

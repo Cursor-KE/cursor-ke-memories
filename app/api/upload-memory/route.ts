@@ -65,7 +65,14 @@ export async function POST(request: NextRequest) {
         console.log(`Successfully uploaded ${file.name}: ${imageUrl}`);
         
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
+        let errorMessage: string;
+        if (error instanceof Error) {
+          errorMessage = error.message;
+        } else if (typeof error === 'string') {
+          errorMessage = error;
+        } else {
+          errorMessage = JSON.stringify(error);
+        }
         console.error(`Error uploading file ${file.name}:`, errorMessage);
         uploadErrors.push(`${file.name}: ${errorMessage}`);
         // Continue with other files instead of failing completely

@@ -192,18 +192,20 @@ export default function UploadMemory({ onClose, onSuccess }: UploadMemoryProps) 
               <p className="text-xs md:text-base text-muted-foreground mb-2 md:mb-4">
                 Drag and drop your photos here, or click to select
               </p>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={files.length >= 5}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  fileInputRef.current?.click();
-                }}
-              >
-                <Icon icon="mdi:folder-open" className="w-4 h-4 mr-2" />
-                Select Photos
-              </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={files.length >= 5}
+              onClick={(e) => {
+                e.stopPropagation();
+                fileInputRef.current?.click();
+              }}
+              className="text-xs md:text-sm"
+            >
+              <Icon icon="mdi:folder-open" className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
+              <span className="hidden md:inline">Select Photos</span>
+              <span className="md:hidden">Select</span>
+            </Button>
               <input
                 ref={fileInputRef}
                 type="file"
@@ -230,10 +232,10 @@ export default function UploadMemory({ onClose, onSuccess }: UploadMemoryProps) 
                     <Button
                       variant="destructive"
                       size="sm"
-                      className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 md:h-8 md:w-8 p-0"
                       onClick={() => removeFile(uploadedFile.id)}
                     >
-                      <Icon icon="mdi:close" className="w-3 h-3" />
+                      <Icon icon="mdi:close" className="w-3 h-3 md:w-4 md:h-4" />
                     </Button>
                   </div>
                 ))}
@@ -321,21 +323,23 @@ export default function UploadMemory({ onClose, onSuccess }: UploadMemoryProps) 
             <Button
               onClick={handleUpload}
               disabled={isUploading || files.length === 0 || !title.trim()}
-              className="flex-1 text-sm md:text-base"
+              className="flex-1 text-xs md:text-base py-2 md:py-3"
             >
               {isUploading ? (
                 <>
-                  <Icon icon="mdi:loading" className="w-4 h-4 mr-2 animate-spin" />
-                  Uploading... ({uploadProgress}%)
+                  <Icon icon="mdi:loading" className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2 animate-spin" />
+                  <span className="hidden md:inline">Uploading... ({uploadProgress}%)</span>
+                  <span className="md:hidden">Uploading {uploadProgress}%</span>
                 </>
               ) : (
                 <>
-                  <Icon icon="mdi:upload" className="w-4 h-4 mr-2" />
-                  Upload Memory
+                  <Icon icon="mdi:upload" className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
+                  <span className="hidden md:inline">Upload Memory</span>
+                  <span className="md:hidden">Upload</span>
                 </>
               )}
             </Button>
-            <Button variant="outline" onClick={onClose} disabled={isUploading} className="text-sm md:text-base">
+            <Button variant="outline" onClick={onClose} disabled={isUploading} className="text-xs md:text-base py-2 md:py-3">
               Cancel
             </Button>
           </div>
