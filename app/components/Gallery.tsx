@@ -71,7 +71,7 @@ export default function Gallery() {
             <p className="text-muted-foreground text-sm">Be the first to share a Cursor KE memory!</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-3">
             {memories.map((memory) => (
               <Card key={memory.id} className="award-glow bg-card border-border hover:border-primary/50 transition-all duration-300 group overflow-hidden">
                 {/* Event Photos - Display all images */}
@@ -83,37 +83,41 @@ export default function Gallery() {
                       memory.images.length === 3 ? 'grid-cols-2' :
                       'grid-cols-2'
                     }`}>
-                      {memory.images.slice(0, 4).map((imageUrl, index) => (
-                        <div
-                          key={index}
-                          className="relative h-48 md:h-64 lg:h-80 overflow-hidden cursor-pointer group/image"
-                          onClick={() => setSelectedImage({ url: imageUrl, title: memory.title })}
-                        >
-                          <img
-                            src={imageUrl}
-                            alt={`${memory.title} - Image ${index + 1}`}
-                            className="w-full h-full object-cover group-hover/image:scale-105 transition-transform duration-300"
-                          />
-                          <div className="absolute inset-0 bg-black/20 group-hover/image:bg-black/10 transition-colors"></div>
-                          
-                          {/* Share button */}
-                          <div className="absolute top-2 left-2 opacity-0 group-hover/image:opacity-100 transition-opacity">
-                            <Button
-                              size="sm"
-                              variant="secondary"
-                              className="bg-black/50 text-white hover:bg-black/70 text-xs md:text-sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                const shareText = encodeURIComponent(`Check out this moment from Cursor Kenya! 🇰🇪 @cursor_ai\n\n${imageUrl}`);
-                                window.open(`https://twitter.com/intent/tweet?text=${shareText}`, '_blank');
-                              }}
-                            >
-                              <Icon icon="mdi:share" className="w-3 h-3 md:w-4 md:h-4 mr-1" />
-                              <span className="hidden md:inline">Share</span>
-                            </Button>
+                      {memory.images.slice(0, 4).map((imageUrl, index) => {
+                        // For 3 images, make the last one span 2 columns to fill the space
+                        const colSpan = memory.images.length === 3 && index === 2 ? 'col-span-2' : '';
+                        return (
+                          <div
+                            key={index}
+                            className={`relative h-48 md:h-64 lg:h-80 overflow-hidden cursor-pointer group/image ${colSpan}`}
+                            onClick={() => setSelectedImage({ url: imageUrl, title: memory.title })}
+                          >
+                            <img
+                              src={imageUrl}
+                              alt={`${memory.title} - Image ${index + 1}`}
+                              className="w-full h-full object-cover group-hover/image:scale-105 transition-transform duration-300"
+                            />
+                            <div className="absolute inset-0 bg-black/20 group-hover/image:bg-black/10 transition-colors"></div>
+                            
+                            {/* Share button */}
+                            <div className="absolute top-2 left-2 opacity-0 group-hover/image:opacity-100 transition-opacity">
+                              <Button
+                                size="sm"
+                                variant="secondary"
+                                className="bg-black/50 text-white hover:bg-black/70 text-xs md:text-sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const shareText = encodeURIComponent(`Check out this moment from Cursor Kenya! 🇰🇪 @cursor_ai\n\n${imageUrl}`);
+                                  window.open(`https://twitter.com/intent/tweet?text=${shareText}`, '_blank');
+                                }}
+                              >
+                                <Icon icon="mdi:share" className="w-3 h-3 md:w-4 md:h-4 mr-1" />
+                                <span className="hidden md:inline">Share</span>
+                              </Button>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                       {/* Show more indicator if there are more than 4 images */}
                       {memory.images.length > 4 && (
                         <div className="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded">
