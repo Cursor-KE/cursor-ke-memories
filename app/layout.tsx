@@ -20,10 +20,15 @@ const comicRelief = Gloria_Hallelujah({
 });
 
 export const metadata: Metadata = {
-  title: "Cursor Hackathon Kisumu - Cursor KE",
+  title: "Cursor KE",
   description: "Cursor KE Memories - Building the future with AI-powered development",
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
   openGraph: {
-    title: "Cursor Hackathon Kisumu - Cursor KE",
+    title: "Cursor KE",
     description: "Join Kenya's premier AI-powered development community. Share memories from meetups and hackathons.",
     url: "https://cursor-ke.vercel.app",
     siteName: "Cursor KE",
@@ -40,7 +45,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Cursor Hackathon Kisumu - Cursor KE",
+    title: "Cursor KE",
     description: "Join Kenya's premier AI-powered development community.",
     images: ["/og-image.svg"],
   },
