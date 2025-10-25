@@ -11,7 +11,7 @@ export default function Header() {
         {/* Cursor Logo */}
         <div className="flex items-center gap-3">
           <img 
-            src="/logos/logo.jpeg" 
+            src="/logo.png" 
             alt="Cursor AI Logo" 
             className="w-12 h-12 object-contain"
           />

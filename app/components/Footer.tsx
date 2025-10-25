@@ -11,7 +11,7 @@ export default function Footer() {
           <div className="text-center md:text-left">
             <div className="flex items-center gap-3 justify-center md:justify-start mb-2">
               <img 
-                src="/logos/logo.jpeg" 
+                src="/logo.png" 
                 alt="Cursor AI Logo" 
                 className="w-10 h-10 object-contain"
               />
