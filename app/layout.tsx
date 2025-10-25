@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Cursor KE",
     description: "Join Kenya's premier AI-powered development community. Share memories from meetups and hackathons.",
-    url: "https://cursor-ke.vercel.app",
+    url: "https://hackimage.vercel.app",
     siteName: "Cursor KE",
     images: [
       {
