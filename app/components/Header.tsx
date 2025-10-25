@@ -11,9 +11,9 @@ export default function Header() {
         {/* Cursor Logo */}
         <div className="flex items-center gap-3">
           <img 
-            src="/logos/cursor-logo.svg" 
+            src="/logos/logo.jpeg" 
             alt="Cursor AI Logo" 
-            className="w-8 h-8"
+            className="w-12 h-12 object-contain"
           />
           <span className="text-xl font-bold text-foreground">Cursor KE</span>
         </div>

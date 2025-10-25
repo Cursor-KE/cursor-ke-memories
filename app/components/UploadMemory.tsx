@@ -336,6 +336,16 @@ export default function UploadMemory({ onClose, onSuccess }: UploadMemoryProps) 
                     cursor halloween hacks X payhero
                   </Label>
                 </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="title-5" 
+                    checked={title === 'cursor hack kisumu'}
+                    onCheckedChange={(checked) => checked && setTitle('cursor hack kisumu')}
+                  />
+                  <Label htmlFor="title-5" className="text-foreground cursor-pointer">
+                    cursor hack kisumu
+                  </Label>
+                </div>
               </div>
             </div>
 
