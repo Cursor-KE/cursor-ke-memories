@@ -8,7 +8,7 @@ import Bridge from "../components/Icons/Bridge";
 import Logo from "../components/Icons/Logo";
 import Modal from "../components/Modal";
 import UploadModal from "../components/UploadModal";
-import cloudinary from "../utils/cloudinary";
+import { fetchMemories, getPublicIdFromUrl, getFormatFromUrl } from "../utils/fetchMemories";
 import getBase64ImageUrl from "../utils/generateBlurPlaceholder";
 import type { ImageProps } from "../utils/types";
 import { useLastViewedPhoto } from "../utils/useLastViewedPhoto";
@@ -129,26 +129,31 @@ const Home: NextPage = ({ images }: { images: ImageProps[] }) => {
 export default Home;
 
 export async function getStaticProps() {
-  const results = await cloudinary.v2.search
-    .expression(`folder:${process.env.CLOUDINARY_FOLDER}/*`)
-    .sort_by("public_id", "desc")
-    .max_results(400)
-    .execute();
+  // Fetch memories from Supabase
+  const memories = await fetchMemories();
+  
   let reducedResults: ImageProps[] = [];
 
   let i = 0;
-  for (let result of results.resources) {
-    reducedResults.push({
-      id: i,
-      height: result.height,
-      width: result.width,
-      public_id: result.public_id,
-      format: result.format,
-    });
-    i++;
+  for (let memory of memories) {
+    // Process each image URL in the images array
+    for (let imageUrl of memory.images) {
+      const public_id = getPublicIdFromUrl(imageUrl);
+      const format = getFormatFromUrl(imageUrl);
+      
+      reducedResults.push({
+        id: i,
+        height: "480",
+        width: "720",
+        public_id: public_id,
+        format: format,
+      });
+      i++;
+    }
   }
 
-  const blurImagePromises = results.resources.map((image: ImageProps) => {
+  // Generate blur placeholders for all images
+  const blurImagePromises = reducedResults.map((image: ImageProps) => {
     return getBase64ImageUrl(image);
   });
   const imagesWithBlurDataUrls = await Promise.all(blurImagePromises);
@@ -161,5 +166,6 @@ export async function getStaticProps() {
     props: {
       images: reducedResults,
     },
+    revalidate: 60, // Revalidate every 60 seconds
   };
 }

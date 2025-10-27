@@ -2,8 +2,7 @@ import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import Carousel from "../../components/Carousel";
-import getResults from "../../utils/cachedImages";
-import cloudinary from "../../utils/cloudinary";
+import { fetchMemories, getPublicIdFromUrl, getFormatFromUrl } from "../../utils/fetchMemories";
 import getBase64ImageUrl from "../../utils/generateBlurPlaceholder";
 import type { ImageProps } from "../../utils/types";
 
@@ -31,47 +30,63 @@ const Home: NextPage = ({ currentPhoto }: { currentPhoto: ImageProps }) => {
 export default Home;
 
 export const getStaticProps: GetStaticProps = async (context) => {
-  const results = await getResults();
-
+  // Fetch memories from Supabase
+  const memories = await fetchMemories();
+  
   let reducedResults: ImageProps[] = [];
   let i = 0;
-  for (let result of results.resources) {
-    reducedResults.push({
-      id: i,
-      height: result.height,
-      width: result.width,
-      public_id: result.public_id,
-      format: result.format,
-    });
-    i++;
+  for (let memory of memories) {
+    for (let imageUrl of memory.images) {
+      const public_id = getPublicIdFromUrl(imageUrl);
+      const format = getFormatFromUrl(imageUrl);
+      
+      reducedResults.push({
+        id: i,
+        height: "480",
+        width: "720",
+        public_id: public_id,
+        format: format,
+      });
+      i++;
+    }
   }
 
   const currentPhoto = reducedResults.find(
     (img) => img.id === Number(context.params.photoId),
   );
+  
+  if (!currentPhoto) {
+    return {
+      notFound: true,
+    };
+  }
+  
   currentPhoto.blurDataUrl = await getBase64ImageUrl(currentPhoto);
 
   return {
     props: {
       currentPhoto: currentPhoto,
     },
+    revalidate: 60,
   };
 };
 
 export async function getStaticPaths() {
-  const results = await cloudinary.v2.search
-    .expression(`folder:${process.env.CLOUDINARY_FOLDER}/*`)
-    .sort_by("public_id", "desc")
-    .max_results(400)
-    .execute();
+  // Fetch memories from Supabase
+  const memories = await fetchMemories();
+  
+  let imageCount = 0;
+  for (let memory of memories) {
+    imageCount += memory.images.length;
+  }
 
   let fullPaths = [];
-  for (let i = 0; i < results.resources.length; i++) {
+  for (let i = 0; i < imageCount; i++) {
     fullPaths.push({ params: { photoId: i.toString() } });
   }
 
   return {
     paths: fullPaths,
-    fallback: false,
+    fallback: "blocking",
   };
 }
