@@ -46,6 +46,9 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [uploadStep, setUploadStep] = useState<'uploading' | 'saving' | 'complete'>('uploading');
+  const [isBlackWhite, setIsBlackWhite] = useState(false);
+  const [imageTitle, setImageTitle] = useState("");
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -81,13 +84,20 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
       return;
     }
 
+    if (!imageTitle.trim()) {
+      setError("Please enter a title for your image");
+      return;
+    }
+
     setUploading(true);
     setError(null);
+    setUploadStep('uploading');
 
     try {
       // Upload to Cloudinary via API route
       const formData = new FormData();
       formData.append("file", selectedFile);
+      formData.append("isBlackWhite", isBlackWhite.toString());
 
       const cloudinaryResponse = await fetch("/api/upload", {
         method: "POST",
@@ -100,6 +110,9 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
       }
 
       const cloudinaryData = await cloudinaryResponse.json();
+      
+      // Update step to saving
+      setUploadStep('saving');
 
       // Combine description with selected emojis
       const finalDescription = [
@@ -111,11 +124,11 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
       const { error: supabaseError } = await supabase
         .from("memories")
         .insert({
-          title: title.trim(),
+          title: imageTitle.trim(), // Use image title instead of event title
           description: finalDescription,
-          category: "Memory",
+          category: title.trim(), // Store event as category
           images: [cloudinaryData.secure_url || cloudinaryData.url],
-          is_black_white: false,
+          is_black_white: isBlackWhite,
         });
 
       if (supabaseError) {
@@ -123,7 +136,10 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
         throw new Error("Failed to save memory: " + supabaseError.message);
       }
 
+      // Update step to complete
+      setUploadStep('complete');
       setSuccess(true);
+      
       setTimeout(() => {
         onClose();
         setSuccess(false);
@@ -132,12 +148,15 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
         setDescription("");
         setSelectedEmojis([]);
         setPreview(null);
+        setUploadStep('uploading');
+        setIsBlackWhite(false);
+        setImageTitle("");
         window.location.reload();
       }, 2000);
     } catch (err: any) {
       setError(err.message || "Upload failed");
-    } finally {
       setUploading(false);
+      setUploadStep('uploading');
     }
   };
 
@@ -153,6 +172,8 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
         setSelectedEmojis([]);
         setPreview(null);
         setError(null);
+        setIsBlackWhite(false);
+        setImageTitle("");
       }, 200);
     }
   };
@@ -170,7 +191,85 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
           </DialogDescription>
         </DialogHeader>
 
-        {success ? (
+        {uploading ? (
+          <div className="flex flex-col items-center justify-center py-16">
+            {/* Animated Icon Container */}
+            <div className="relative mb-8">
+              <div className="flex h-24 w-24 items-center justify-center rounded-full bg-primary/10">
+                <Icon 
+                  icon="mdi:cloud-upload" 
+                  className="h-12 w-12 text-primary animate-bounce" 
+                />
+              </div>
+              {/* Pulsing ring effect */}
+              <div className="absolute inset-0 rounded-full border-2 border-primary/30 animate-ping" />
+            </div>
+
+            {/* Step Indicator */}
+            <div className="mb-6 w-full max-w-sm">
+              {/* Step 1: Uploading */}
+              <div className={`flex items-start gap-3 transition-colors ${uploadStep === 'uploading' ? 'text-primary' : uploadStep === 'saving' || uploadStep === 'complete' ? 'text-green-600' : 'text-muted-foreground'}`}>
+                <div className="flex flex-col items-center flex-shrink-0">
+                  {uploadStep === 'uploading' ? (
+                    <Icon icon="mdi:loading" className="h-6 w-6 animate-spin" />
+                  ) : uploadStep === 'saving' || uploadStep === 'complete' ? (
+                    <Icon icon="mdi:check-circle" className="h-6 w-6" />
+                  ) : (
+                    <Icon icon="mdi:checkbox-blank-circle-outline" className="h-6 w-6" />
+                  )}
+                  {/* Connector Line */}
+                  <div className={`h-12 w-0.5 mt-2 mb-2 ${uploadStep === 'saving' || uploadStep === 'complete' ? 'bg-green-600' : 'bg-gray-300'}`} />
+                </div>
+                <div className="flex-1 pt-1">
+                  <div className="font-medium">Uploading Image</div>
+                  <div className="text-xs text-muted-foreground">Sending to cloud storage</div>
+                </div>
+              </div>
+
+              {/* Step 2: Saving */}
+              <div className={`flex items-start gap-3 transition-colors ${uploadStep === 'saving' ? 'text-primary' : uploadStep === 'complete' ? 'text-green-600' : 'text-muted-foreground'}`}>
+                <div className="flex-shrink-0">
+                  {uploadStep === 'saving' ? (
+                    <Icon icon="mdi:loading" className="h-6 w-6 animate-spin" />
+                  ) : uploadStep === 'complete' ? (
+                    <Icon icon="mdi:check-circle" className="h-6 w-6" />
+                  ) : (
+                    <Icon icon="mdi:checkbox-blank-circle-outline" className="h-6 w-6" />
+                  )}
+                </div>
+                <div className="flex-1 pt-1">
+                  <div className="font-medium">Saving to Database</div>
+                  <div className="text-xs text-muted-foreground">Storing metadata</div>
+                </div>
+              </div>
+              
+              {/* Progress Bar */}
+              <div className="h-2 bg-gray-200 rounded-full overflow-hidden mt-4">
+                <div 
+                  className={`h-full bg-primary transition-all duration-500 ${
+                    uploadStep === 'uploading' ? 'w-1/2' : 
+                    uploadStep === 'saving' ? 'w-3/4' : 
+                    'w-full'
+                  }`}
+                />
+              </div>
+            </div>
+
+            {/* Status Text */}
+            <div className="text-center">
+              <h3 className="text-lg font-semibold mb-2">
+                {uploadStep === 'uploading' && 'Uploading your memory to the cloud...'}
+                {uploadStep === 'saving' && 'Saving your memory...'}
+                {uploadStep === 'complete' && 'Almost done!'}
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                {uploadStep === 'uploading' && 'Please wait while we upload your image'}
+                {uploadStep === 'saving' && 'Storing your memory in our database'}
+                {uploadStep === 'complete' && 'Redirecting to gallery...'}
+              </p>
+            </div>
+          </div>
+        ) : success ? (
           <div className="flex flex-col items-center justify-center py-12">
             <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-green-100">
               <Icon icon="mdi:check-circle" className="h-12 w-12 text-green-600" />
@@ -202,6 +301,23 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
               </Select>
             </div>
 
+            {/* Image Title */}
+            <div className="space-y-2">
+              <Label htmlFor="imageTitle" className="flex items-center gap-2">
+                <Icon icon="mdi:text-box" className="h-4 w-4" />
+                Image Title <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="imageTitle"
+                placeholder="e.g., Team Photo, Award Ceremony, Group Selfie..."
+                value={imageTitle}
+                onChange={(e) => setImageTitle(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                Give your image a descriptive title that captures the moment
+              </p>
+            </div>
+
             {/* Image Upload */}
             <div className="space-y-2">
               <Label htmlFor="image" className="flex items-center gap-2">
@@ -215,7 +331,9 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
                       <img
                         src={preview}
                         alt="Preview"
-                        className="h-[300px] w-full object-cover"
+                        className={`h-[300px] w-full object-cover transition-all duration-300 ${
+                          isBlackWhite ? 'grayscale' : ''
+                        }`}
                       />
                       <Button
                         variant="destructive"
@@ -228,6 +346,14 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
                       >
                         <Icon icon="mdi:close" className="h-4 w-4" />
                       </Button>
+                      {isBlackWhite && (
+                        <div className="absolute left-2 top-2">
+                          <div className="rounded-full bg-primary/90 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-sm">
+                            <Icon icon="mdi:palette" className="mr-1 inline h-3 w-3" />
+                            B&W
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -293,6 +419,36 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
               )}
             </div>
 
+            {/* Black & White Option */}
+            <Card className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Icon icon="mdi:palette" className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <Label htmlFor="blackWhite" className="font-medium cursor-pointer">
+                      Convert to Black & White
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      Transform your memory into a classic monochrome look
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsBlackWhite(!isBlackWhite)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    isBlackWhite ? 'bg-primary' : 'bg-gray-300'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      isBlackWhite ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+            </Card>
+
             {/* Error Alert */}
             {error && (
               <Alert variant="destructive">
@@ -313,7 +469,7 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
               </Button>
               <Button
                 onClick={handleUpload}
-                disabled={uploading || !selectedFile || !title.trim()}
+                disabled={uploading || !selectedFile || !title.trim() || !imageTitle.trim()}
                 className="flex-1"
               >
                 {uploading ? (

@@ -73,7 +73,7 @@ export default function SharedModal({
                   width={navigation ? 1280 : 1920}
                   height={navigation ? 853 : 1280}
                   priority
-                  alt="Cursor Kenya Memory"
+                  alt={currentImage.title || "Cursor Kenya Memory"}
                   onLoad={() => setLoaded(true)}
                 />
               </motion.div>
@@ -86,6 +86,12 @@ export default function SharedModal({
           {/* Buttons */}
           {loaded && (
             <div className="relative aspect-[3/2] max-h-full w-full">
+              {/* Title Display */}
+              {currentImage.title && !navigation && (
+                <div className="absolute bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-black/90 via-black/70 to-transparent p-6">
+                  <h2 className="text-xl font-bold text-white">{currentImage.title}</h2>
+                </div>
+              )}
               {navigation && (
                 <>
                   {index > 0 && (

@@ -16,9 +16,10 @@ const Home: NextPage = ({ currentPhoto }: { currentPhoto: ImageProps }) => {
   return (
     <>
       <Head>
-        <title>Cursor Kenya - Memories</title>
+        <title>{currentPhoto.title ? `${currentPhoto.title} - Cursor Kenya Memories` : 'Cursor Kenya - Memories'}</title>
         <meta property="og:image" content={currentPhotoUrl} />
         <meta name="twitter:image" content={currentPhotoUrl} />
+        {currentPhoto.title && <meta property="og:title" content={currentPhoto.title} />}
       </Head>
       <main className="mx-auto max-w-[1960px] p-4">
         <Carousel currentPhoto={currentPhoto} index={index} />
@@ -46,6 +47,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
         width: "720",
         public_id: public_id,
         format: format,
+        title: memory.title, // Include the memory title
       });
       i++;
     }

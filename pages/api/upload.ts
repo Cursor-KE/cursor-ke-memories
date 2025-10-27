@@ -29,17 +29,27 @@ export default async function handler(
       return res.status(400).json({ error: "No file provided" });
     }
 
+    // Get black and white preference
+    const isBlackWhite = fields.isBlackWhite?.[0] === 'true';
+
     // Read file buffer
     const fileBuffer = fs.readFileSync(file.filepath);
 
-    // Upload to Cloudinary
+    // Upload to Cloudinary with transformations
     const result = await new Promise((resolve, reject) => {
+      const uploadOptions: any = {
+        folder: "cursor-ke-memories",
+        resource_type: "image",
+      };
+
+      // Apply grayscale transformation if black and white is enabled
+      if (isBlackWhite) {
+        uploadOptions.effect = "grayscale";
+      }
+
       cloudinary.v2.uploader
         .upload_stream(
-          {
-            folder: "cursor-ke-memories",
-            resource_type: "image",
-          },
+          uploadOptions,
           (error, result) => {
             if (error) reject(error);
             else resolve(result);

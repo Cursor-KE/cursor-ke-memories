@@ -71,7 +71,7 @@ const Home: NextPage = ({ images }: { images: ImageProps[] }) => {
               </p>
             </div>
           </div>
-          {images.map(({ id, public_id, format, blurDataUrl }) => (
+          {images.map(({ id, public_id, format, blurDataUrl, title }) => (
             <Link
               key={id}
               href={`/?photoId=${id}`}
@@ -80,20 +80,28 @@ const Home: NextPage = ({ images }: { images: ImageProps[] }) => {
               shallow
               className="after:content group relative mb-5 block w-full cursor-zoom-in after:pointer-events-none after:absolute after:inset-0 after:rounded-lg after:shadow-highlight"
             >
-              <Image
-                alt="Cursor Kenya Memory"
-                className="transform rounded-lg brightness-90 transition will-change-auto group-hover:brightness-110"
-                style={{ transform: "translate3d(0, 0, 0)" }}
-                placeholder="blur"
-                blurDataURL={blurDataUrl}
-                src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/c_scale,w_720/${public_id}.${format}`}
-                width={720}
-                height={480}
-                sizes="(max-width: 640px) 100vw,
-                  (max-width: 1280px) 50vw,
-                  (max-width: 1536px) 33vw,
-                  25vw"
-              />
+              <div className="relative">
+                <Image
+                  alt={title || "Cursor Kenya Memory"}
+                  className="transform rounded-lg brightness-90 transition will-change-auto group-hover:brightness-110"
+                  style={{ transform: "translate3d(0, 0, 0)" }}
+                  placeholder="blur"
+                  blurDataURL={blurDataUrl}
+                  src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/c_scale,w_720/${public_id}.${format}`}
+                  width={720}
+                  height={480}
+                  sizes="(max-width: 640px) 100vw,
+                    (max-width: 1280px) 50vw,
+                    (max-width: 1536px) 33vw,
+                    25vw"
+                />
+                {/* Title overlay - always visible with subtle background */}
+                <div className="absolute bottom-0 left-0 right-0 rounded-b-lg bg-gradient-to-t from-black/80 via-black/60 to-transparent p-3">
+                  <p className="text-sm font-semibold text-white line-clamp-2 drop-shadow-lg">
+                    {title || "Untitled Memory"}
+                  </p>
+                </div>
+              </div>
             </Link>
           ))}
         </div>
@@ -138,6 +146,7 @@ export async function getStaticProps() {
         width: "720",
         public_id: public_id,
         format: format,
+        title: memory.title, // Include the memory title
       });
       i++;
     }
