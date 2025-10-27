@@ -42,8 +42,9 @@ export async function compressImageToTarget(
   }
 
   const makeCanvas = (w: number, h: number) => {
-    const offscreen = typeof OffscreenCanvas !== "undefined"
-      ? new OffscreenCanvas(w, h)
+    const hasOffscreen = typeof (globalThis as any).OffscreenCanvas !== "undefined";
+    const offscreen = hasOffscreen
+      ? new (globalThis as any).OffscreenCanvas(w, h)
       : (() => {
           const c = document.createElement("canvas");
           c.width = w;
@@ -60,10 +61,10 @@ export async function compressImageToTarget(
   const toBlob = (q: number) =>
     new Promise<Blob>((resolve, reject) => {
       const onBlob = (b: Blob | null) => (b ? resolve(b) : reject(new Error("toBlob failed")));
-      if ("convertToBlob" in canvas) {
-        (canvas as OffscreenCanvas)
+      if ((canvas as any).convertToBlob) {
+        (canvas as any)
           .convertToBlob({ type: outType, quality: q })
-          .then((b) => resolve(b))
+          .then((b: Blob) => resolve(b))
           .catch(reject);
       } else {
         (canvas as HTMLCanvasElement).toBlob(onBlob, outType, q);
@@ -86,8 +87,8 @@ export async function compressImageToTarget(
     const newH = Math.max(1, Math.floor(height * Math.min(0.95, factor)));
     const { canvas: c2 } = makeCanvas(newW, newH);
     const toBlob2 = (q: number) =>
-      "convertToBlob" in c2
-        ? (c2 as OffscreenCanvas).convertToBlob({ type: outType, quality: q })
+      (c2 as any).convertToBlob
+        ? (c2 as any).convertToBlob({ type: outType, quality: q })
         : new Promise<Blob>((resolve, reject) =>
             (c2 as HTMLCanvasElement).toBlob(
               (b) => (b ? resolve(b) : reject(new Error("toBlob failed"))),
