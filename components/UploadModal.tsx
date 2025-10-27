@@ -203,11 +203,11 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto mx-4">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-2xl">
+          <DialogTitle className="flex items-center gap-2 text-2xl text-foreground">
             <Icon icon="mdi:upload" className="h-6 w-6" />
             Upload Your Memory
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-muted-foreground">
             Share your amazing moments from Cursor Kenya events
           </DialogDescription>
         </DialogHeader>
@@ -301,16 +301,16 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
           <div className="space-y-6">
             {/* Event Selection */}
             <div className="space-y-2">
-              <Label className="flex items-center gap-2">
+              <Label className="flex items-center gap-2 text-white">
                 <Icon icon="mdi:calendar-event" className="h-4 w-4" />
                 Event <span className="text-red-500">*</span>
               </Label>
-              <Card className="p-4">
+              <Card className="p-4 bg-black/50 text-white">
                 <div className="space-y-3">
                   {EVENT_TITLES.map((eventTitle) => (
                     <label
                       key={eventTitle}
-                      className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded-md transition-colors"
+                      className="flex items-center gap-3 cursor-pointer hover:bg-white/10 p-2 rounded-md transition-colors"
                     >
                       <input
                         type="radio"
@@ -321,15 +321,15 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
                             setSelectedEvents([eventTitle]);
                           }
                         }}
-                        className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
+                        className="h-4 w-4 border-white/50 bg-transparent text-primary focus:ring-primary"
                       />
-                      <span className="text-sm font-medium">{eventTitle}</span>
+                      <span className="text-sm font-medium text-white">{eventTitle}</span>
                     </label>
                   ))}
                 </div>
               </Card>
               {selectedEvents.length > 0 && (
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-white/70">
                   Selected: {selectedEvents[0]}
                 </p>
               )}
@@ -337,12 +337,12 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
 
             {/* Image Upload */}
             <div className="space-y-2">
-              <Label htmlFor="image" className="flex items-center gap-2">
+              <Label htmlFor="image" className="flex items-center gap-2 text-white">
                 <Icon icon="mdi:image" className="h-4 w-4" />
                 Select an image <span className="text-red-500">*</span>
               </Label>
               {preview ? (
-                <Card className="overflow-hidden">
+                <Card className="overflow-hidden bg-background/40 text-foreground">
                   <CardContent className="p-0">
                     <div className="relative">
                       <img
@@ -375,11 +375,11 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="flex items-center justify-center rounded-lg border-2 border-dashed border-gray-300 p-12 transition-colors hover:border-gray-400">
+                <div className="flex items-center justify-center rounded-lg border-2 border-dashed p-12 transition-colors border-muted-foreground/30 hover:border-primary/60 bg-muted/20">
                   <label htmlFor="image" className="cursor-pointer text-center">
-                    <Icon icon="mdi:cloud-upload" className="mx-auto h-12 w-12 text-gray-400" />
-                    <p className="mt-2 text-sm font-medium">Click to upload</p>
-                    <p className="text-xs text-gray-500">or drag and drop</p>
+                    <Icon icon="mdi:cloud-upload" className="mx-auto h-12 w-12 text-white" />
+                    <p className="mt-2 text-sm font-medium text-white">Click to upload</p>
+                    <p className="text-xs text-white/80">or drag and drop</p>
                     <input
                       id="image"
                       type="file"
@@ -394,7 +394,7 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
 
             {/* Description */}
             <div className="space-y-2">
-              <Label htmlFor="description" className="flex items-center gap-2">
+              <Label htmlFor="description" className="flex items-center gap-2 text-white">
                 <Icon icon="mdi:text" className="h-4 w-4" />
                 Description (optional)
               </Label>
@@ -409,7 +409,7 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
 
             {/* Emojis */}
             <div className="space-y-2">
-              <Label className="flex items-center gap-2">
+              <Label className="flex items-center gap-2 text-white">
                 <Icon icon="mdi:emoticon-happy" className="h-4 w-4" />
                 Add Emojis (optional)
               </Label>

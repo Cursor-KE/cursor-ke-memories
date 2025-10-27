@@ -3,7 +3,7 @@ import Document, { Head, Html, Main, NextScript } from "next/document";
 class MyDocument extends Document {
   render() {
     return (
-      <Html lang="en">
+      <Html lang="en" className="dark">
         <Head>
           <link rel="icon" href="/cursor-community-avatar.png" />
           <link rel="apple-touch-icon" href="/cursor-community-avatar.png" />
@@ -24,7 +24,7 @@ class MyDocument extends Document {
             content="Relive amazing moments from Cursor Kenya events and meetups!"
           />
         </Head>
-        <body className="bg-black antialiased">
+        <body className="antialiased">
           <Main />
           <NextScript />
         </body>
