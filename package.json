@@ -4,7 +4,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "delete-poor-quality": "ts-node --require dotenv/config scripts/delete-poor-quality-images.ts"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.4",
@@ -38,10 +39,12 @@
     "@types/node": "18.11.9",
     "@types/react": "18.2.8",
     "autoprefixer": "^10.4.13",
+    "dotenv": "^17.2.3",
     "postcss": "^8.4.18",
     "prettier": "^2.7.1",
     "prettier-plugin-tailwindcss": "^0.1.13",
     "tailwindcss": "^3.2.1",
+    "ts-node": "^10.9.2",
     "typescript": "4.8.4"
   }
 }

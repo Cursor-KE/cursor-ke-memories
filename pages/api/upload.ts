@@ -35,17 +35,15 @@ export default async function handler(
     // Read file buffer
     const fileBuffer = fs.readFileSync(file.filepath);
 
-    // Upload to Cloudinary with transformations
+    // Upload to Cloudinary without applying grayscale effect (faster upload)
+    // We'll apply the effect via URL transformations when displaying
     const result = await new Promise((resolve, reject) => {
       const uploadOptions: any = {
         folder: "cursor-ke-memories",
         resource_type: "image",
+        quality: "auto:best",
+        fetch_format: "auto",
       };
-
-      // Apply grayscale transformation if black and white is enabled
-      if (isBlackWhite) {
-        uploadOptions.effect = "grayscale";
-      }
 
       cloudinary.v2.uploader
         .upload_stream(

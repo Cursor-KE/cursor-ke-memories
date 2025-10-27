@@ -7,6 +7,7 @@ export interface ImageProps {
   format: string;
   blurDataUrl?: string;
   title?: string;
+  is_black_white?: boolean;
 }
 
 export interface SharedModalProps {

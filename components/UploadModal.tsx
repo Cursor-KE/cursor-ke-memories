@@ -39,7 +39,7 @@ const EMOJIS = ["🇰🇪", "💻", "🎉", "🚀", "🔥", "✨", "💡", "🎯
 
 export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [title, setTitle] = useState("");
+  const [selectedEvents, setSelectedEvents] = useState<string[]>([]);
   const [description, setDescription] = useState("");
   const [selectedEmojis, setSelectedEmojis] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -48,7 +48,7 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
   const [preview, setPreview] = useState<string | null>(null);
   const [uploadStep, setUploadStep] = useState<'uploading' | 'saving' | 'complete'>('uploading');
   const [isBlackWhite, setIsBlackWhite] = useState(false);
-  const [imageTitle, setImageTitle] = useState("");
+  const [uploadPercent, setUploadPercent] = useState(0);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -79,13 +79,8 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
       return;
     }
 
-    if (!title.trim()) {
-      setError("Please select an event");
-      return;
-    }
-
-    if (!imageTitle.trim()) {
-      setError("Please enter a title for your image");
+    if (selectedEvents.length === 0) {
+      setError("Please select at least one event");
       return;
     }
 
@@ -94,22 +89,40 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
     setUploadStep('uploading');
 
     try {
-      // Upload to Cloudinary via API route
-      const formData = new FormData();
-      formData.append("file", selectedFile);
-      formData.append("isBlackWhite", isBlackWhite.toString());
+      // Step 1: request a short-lived signature
+      const sign = await fetch("/api/sign-cloudinary", { method: "POST" }).then((r) => r.json());
 
-      const cloudinaryResponse = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
+      // Step 2: direct upload to Cloudinary with progress
+      let cloudinaryData: any = null;
+      setUploadPercent(0);
+
+      await new Promise<void>((resolve, reject) => {
+        const form = new FormData();
+        form.append("file", selectedFile);
+        form.append("api_key", sign.apiKey);
+        form.append("timestamp", String(sign.timestamp));
+        form.append("signature", sign.signature);
+        form.append("folder", sign.folder);
+
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", `https://api.cloudinary.com/v1_1/${sign.cloudName}/image/upload`);
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) {
+            const pct = Math.round((e.loaded / e.total) * 100);
+            setUploadPercent(pct);
+          }
+        };
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            cloudinaryData = JSON.parse(xhr.responseText);
+            resolve();
+          } else {
+            reject(new Error("Cloudinary upload failed"));
+          }
+        };
+        xhr.onerror = () => reject(new Error("Network error during upload"));
+        xhr.send(form);
       });
-
-      if (!cloudinaryResponse.ok) {
-        const errorData = await cloudinaryResponse.json();
-        throw new Error(errorData.error || "Failed to upload to Cloudinary");
-      }
-
-      const cloudinaryData = await cloudinaryResponse.json();
       
       // Update step to saving
       setUploadStep('saving');
@@ -124,9 +137,9 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
       const { error: supabaseError } = await supabase
         .from("memories")
         .insert({
-          title: imageTitle.trim(), // Use image title instead of event title
+          title: selectedEvents.join(", "), // Use selected events as title
           description: finalDescription,
-          category: title.trim(), // Store event as category
+          category: "Memory",
           images: [cloudinaryData.secure_url || cloudinaryData.url],
           is_black_white: isBlackWhite,
         });
@@ -144,13 +157,12 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
         onClose();
         setSuccess(false);
         setSelectedFile(null);
-        setTitle("");
+        setSelectedEvents([]);
         setDescription("");
         setSelectedEmojis([]);
         setPreview(null);
         setUploadStep('uploading');
         setIsBlackWhite(false);
-        setImageTitle("");
         window.location.reload();
       }, 2000);
     } catch (err: any) {
@@ -167,20 +179,19 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
       setTimeout(() => {
         setSuccess(false);
         setSelectedFile(null);
-        setTitle("");
+        setSelectedEvents([]);
         setDescription("");
         setSelectedEmojis([]);
         setPreview(null);
         setError(null);
         setIsBlackWhite(false);
-        setImageTitle("");
       }, 200);
     }
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto mx-4">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-2xl">
             <Icon icon="mdi:upload" className="h-6 w-6" />
@@ -245,12 +256,9 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
               
               {/* Progress Bar */}
               <div className="h-2 bg-gray-200 rounded-full overflow-hidden mt-4">
-                <div 
-                  className={`h-full bg-primary transition-all duration-500 ${
-                    uploadStep === 'uploading' ? 'w-1/2' : 
-                    uploadStep === 'saving' ? 'w-3/4' : 
-                    'w-full'
-                  }`}
+                <div
+                  className="h-full bg-primary transition-all duration-300"
+                  style={{ width: `${uploadStep === 'uploading' ? uploadPercent : uploadStep === 'saving' ? 90 : 100}%` }}
                 />
               </div>
             </div>
@@ -283,39 +291,38 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
           <div className="space-y-6">
             {/* Event Selection */}
             <div className="space-y-2">
-              <Label htmlFor="event" className="flex items-center gap-2">
+              <Label className="flex items-center gap-2">
                 <Icon icon="mdi:calendar-event" className="h-4 w-4" />
                 Event <span className="text-red-500">*</span>
               </Label>
-              <Select value={title} onValueChange={setTitle}>
-                <SelectTrigger id="event">
-                  <SelectValue placeholder="Select an event" />
-                </SelectTrigger>
-                <SelectContent>
+              <Card className="p-4">
+                <div className="space-y-3">
                   {EVENT_TITLES.map((eventTitle) => (
-                    <SelectItem key={eventTitle} value={eventTitle}>
-                      {eventTitle}
-                    </SelectItem>
+                    <label
+                      key={eventTitle}
+                      className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded-md transition-colors"
+                    >
+                      <input
+                        type="radio"
+                        name="event"
+                        checked={selectedEvents[0] === eventTitle}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedEvents([eventTitle]);
+                          }
+                        }}
+                        className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
+                      />
+                      <span className="text-sm font-medium">{eventTitle}</span>
+                    </label>
                   ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Image Title */}
-            <div className="space-y-2">
-              <Label htmlFor="imageTitle" className="flex items-center gap-2">
-                <Icon icon="mdi:text-box" className="h-4 w-4" />
-                Image Title <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="imageTitle"
-                placeholder="e.g., Team Photo, Award Ceremony, Group Selfie..."
-                value={imageTitle}
-                onChange={(e) => setImageTitle(e.target.value)}
-              />
-              <p className="text-xs text-muted-foreground">
-                Give your image a descriptive title that captures the moment
-              </p>
+                </div>
+              </Card>
+              {selectedEvents.length > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  Selected: {selectedEvents[0]}
+                </p>
+              )}
             </div>
 
             {/* Image Upload */}
@@ -469,7 +476,7 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
               </Button>
               <Button
                 onClick={handleUpload}
-                disabled={uploading || !selectedFile || !title.trim() || !imageTitle.trim()}
+                disabled={uploading || !selectedFile || selectedEvents.length === 0}
                 className="flex-1"
               >
                 {uploading ? (
