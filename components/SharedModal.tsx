@@ -1,15 +1,8 @@
-import {
-  ArrowDownTrayIcon,
-  ArrowTopRightOnSquareIcon,
-  ArrowUturnLeftIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
 import { AnimatePresence, motion, MotionConfig } from "framer-motion";
 import Image from "next/image";
 import { useState } from "react";
 import { useSwipeable } from "react-swipeable";
+import { Icon } from "@iconify/react";
 import { variants } from "../utils/animationVariants";
 import downloadPhoto from "../utils/downloadPhoto";
 import { range } from "../utils/range";
@@ -101,7 +94,7 @@ export default function SharedModal({
                       style={{ transform: "translate3d(0, 0, 0)" }}
                       onClick={() => changePhotoId(index - 1)}
                     >
-                      <ChevronLeftIcon className="h-6 w-6" />
+                      <Icon icon="mdi:chevron-left" className="h-6 w-6" />
                     </button>
                   )}
                   {index + 1 < images.length && (
@@ -110,7 +103,7 @@ export default function SharedModal({
                       style={{ transform: "translate3d(0, 0, 0)" }}
                       onClick={() => changePhotoId(index + 1)}
                     >
-                      <ChevronRightIcon className="h-6 w-6" />
+                      <Icon icon="mdi:chevron-right" className="h-6 w-6" />
                     </button>
                   )}
                 </>
@@ -124,7 +117,7 @@ export default function SharedModal({
                     title="Open fullsize version"
                     rel="noreferrer"
                   >
-                    <ArrowTopRightOnSquareIcon className="h-5 w-5" />
+                    <Icon icon="mdi:open-in-new" className="h-5 w-5" />
                   </a>
                 ) : (
                   <a
@@ -147,7 +140,7 @@ export default function SharedModal({
                   className="rounded-full bg-black/50 p-2 text-white/75 backdrop-blur-lg transition hover:bg-black/75 hover:text-white"
                   title="Download fullsize version"
                 >
-                  <ArrowDownTrayIcon className="h-5 w-5" />
+                  <Icon icon="mdi:download" className="h-5 w-5" />
                 </button>
               </div>
               <div className="absolute top-0 left-0 flex items-center gap-2 p-3 text-white">
@@ -156,9 +149,9 @@ export default function SharedModal({
                   className="rounded-full bg-black/50 p-2 text-white/75 backdrop-blur-lg transition hover:bg-black/75 hover:text-white"
                 >
                   {navigation ? (
-                    <XMarkIcon className="h-5 w-5" />
+                    <Icon icon="mdi:close" className="h-5 w-5" />
                   ) : (
-                    <ArrowUturnLeftIcon className="h-5 w-5" />
+                    <Icon icon="mdi:arrow-left" className="h-5 w-5" />
                   )}
                 </button>
               </div>

@@ -1,36 +1,83 @@
-import { Dialog } from "@headlessui/react";
 import { useState } from "react";
+import { Icon } from "@iconify/react";
 import { supabase } from "../utils/supabase";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "./ui/dialog";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Textarea } from "./ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
+import { Alert, AlertDescription } from "./ui/alert";
+import { Card, CardContent } from "./ui/card";
 
 interface UploadModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+const EVENT_TITLES = [
+  "cursor kenya meet #1",
+  "cursor Nakuru Meet",
+  "cursor KE x makevewave Hack",
+  "cursor KE x Payhero hack",
+  "Cursor KE Kisumu Hack",
+];
+
+const EMOJIS = ["🇰🇪", "💻", "🎉", "🚀", "🔥", "✨", "💡", "🎯", "👥", "🤝", "🏆", "📸", "😊", "❤️", "💯"];
+
 export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState<"Memory" | "Activity">("Memory");
+  const [selectedEmojis, setSelectedEmojis] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setSelectedFile(e.target.files[0]);
+      const file = e.target.files[0];
+      setSelectedFile(file);
       setError(null);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
+  };
+
+  const toggleEmoji = (emoji: string) => {
+    setSelectedEmojis(prev => 
+      prev.includes(emoji) 
+        ? prev.filter(e => e !== emoji)
+        : [...prev, emoji]
+    );
   };
 
   const handleUpload = async () => {
     if (!selectedFile) {
-      setError("Please select a file");
+      setError("Please select an image");
       return;
     }
 
     if (!title.trim()) {
-      setError("Please enter a title");
+      setError("Please select an event");
       return;
     }
 
@@ -54,13 +101,19 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
 
       const cloudinaryData = await cloudinaryResponse.json();
 
+      // Combine description with selected emojis
+      const finalDescription = [
+        description.trim(),
+        selectedEmojis.join(" ")
+      ].filter(Boolean).join(" ") || null;
+
       // Store metadata in Supabase
       const { error: supabaseError } = await supabase
         .from("memories")
         .insert({
           title: title.trim(),
-          description: description.trim() || null,
-          category: category,
+          description: finalDescription,
+          category: "Memory",
           images: [cloudinaryData.secure_url || cloudinaryData.url],
           is_black_white: false,
         });
@@ -77,7 +130,8 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
         setSelectedFile(null);
         setTitle("");
         setDescription("");
-        setCategory("Memory");
+        setSelectedEmojis([]);
+        setPreview(null);
         window.location.reload();
       }, 2000);
     } catch (err: any) {
@@ -87,108 +141,197 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
     }
   };
 
+  const handleClose = () => {
+    if (!uploading) {
+      onClose();
+      // Reset form after a short delay to allow animation
+      setTimeout(() => {
+        setSuccess(false);
+        setSelectedFile(null);
+        setTitle("");
+        setDescription("");
+        setSelectedEmojis([]);
+        setPreview(null);
+        setError(null);
+      }, 200);
+    }
+  };
+
   return (
-    <Dialog open={isOpen} onClose={onClose} className="relative z-50">
-      <div className="fixed inset-0 bg-black/70 backdrop-blur-2xl" aria-hidden="true" />
-      
-      <div className="fixed inset-0 flex items-center justify-center p-4">
-        <Dialog.Panel className="mx-auto max-w-lg rounded-lg bg-white p-6">
-          <Dialog.Title className="text-2xl font-bold mb-4">
+    <Dialog open={isOpen} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-[600px]">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-2xl">
+            <Icon icon="mdi:upload" className="h-6 w-6" />
             Upload Your Memory
-          </Dialog.Title>
+          </DialogTitle>
+          <DialogDescription>
+            Share your amazing moments from Cursor Kenya events
+          </DialogDescription>
+        </DialogHeader>
 
-          {success ? (
-            <div className="text-center py-8">
-              <div className="text-green-600 text-6xl mb-4">✓</div>
-              <p className="text-xl">Memory uploaded successfully!</p>
+        {success ? (
+          <div className="flex flex-col items-center justify-center py-12">
+            <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-green-100">
+              <Icon icon="mdi:check-circle" className="h-12 w-12 text-green-600" />
             </div>
-          ) : (
-            <>
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">
-                  Title <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Enter memory title"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-                />
-              </div>
+            <h3 className="text-xl font-semibold">Memory uploaded successfully!</h3>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Your memory will appear in the gallery shortly
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {/* Event Selection */}
+            <div className="space-y-2">
+              <Label htmlFor="event" className="flex items-center gap-2">
+                <Icon icon="mdi:calendar-event" className="h-4 w-4" />
+                Event <span className="text-red-500">*</span>
+              </Label>
+              <Select value={title} onValueChange={setTitle}>
+                <SelectTrigger id="event">
+                  <SelectValue placeholder="Select an event" />
+                </SelectTrigger>
+                <SelectContent>
+                  {EVENT_TITLES.map((eventTitle) => (
+                    <SelectItem key={eventTitle} value={eventTitle}>
+                      {eventTitle}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">
-                  Description
-                </label>
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Enter memory description (optional)"
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-                />
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">
-                  Category <span className="text-red-500">*</span>
-                </label>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value as "Memory" | "Activity")}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-                >
-                  <option value="Memory">Memory</option>
-                  <option value="Activity">Activity</option>
-                </select>
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">
-                  Select an image <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="block w-full text-sm text-gray-500
-                    file:mr-4 file:py-2 file:px-4
-                    file:rounded-lg file:border-0
-                    file:text-sm file:font-semibold
-                    file:bg-black file:text-white
-                    hover:file:bg-gray-800
-                    cursor-pointer"
-                />
-              </div>
-
-              {error && (
-                <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">
-                  {error}
+            {/* Image Upload */}
+            <div className="space-y-2">
+              <Label htmlFor="image" className="flex items-center gap-2">
+                <Icon icon="mdi:image" className="h-4 w-4" />
+                Select an image <span className="text-red-500">*</span>
+              </Label>
+              {preview ? (
+                <Card className="overflow-hidden">
+                  <CardContent className="p-0">
+                    <div className="relative">
+                      <img
+                        src={preview}
+                        alt="Preview"
+                        className="h-[300px] w-full object-cover"
+                      />
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        className="absolute right-2 top-2"
+                        onClick={() => {
+                          setSelectedFile(null);
+                          setPreview(null);
+                        }}
+                      >
+                        <Icon icon="mdi:close" className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="flex items-center justify-center rounded-lg border-2 border-dashed border-gray-300 p-12 transition-colors hover:border-gray-400">
+                  <label htmlFor="image" className="cursor-pointer text-center">
+                    <Icon icon="mdi:cloud-upload" className="mx-auto h-12 w-12 text-gray-400" />
+                    <p className="mt-2 text-sm font-medium">Click to upload</p>
+                    <p className="text-xs text-gray-500">or drag and drop</p>
+                    <input
+                      id="image"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                  </label>
                 </div>
               )}
+            </div>
 
-              <div className="flex gap-3">
-                <button
-                  onClick={onClose}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-                  disabled={uploading}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleUpload}
-                  disabled={uploading || !selectedFile || !title.trim()}
-                  className="flex-1 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {uploading ? "Uploading..." : "Upload Memory"}
-                </button>
+            {/* Description */}
+            <div className="space-y-2">
+              <Label htmlFor="description" className="flex items-center gap-2">
+                <Icon icon="mdi:text" className="h-4 w-4" />
+                Description (optional)
+              </Label>
+              <Textarea
+                id="description"
+                placeholder="Share your memory..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={3}
+              />
+            </div>
+
+            {/* Emojis */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <Icon icon="mdi:emoticon-happy" className="h-4 w-4" />
+                Add Emojis (optional)
+              </Label>
+              <div className="flex flex-wrap gap-2 rounded-lg border p-3">
+                {EMOJIS.map((emoji) => (
+                  <button
+                    key={emoji}
+                    type="button"
+                    onClick={() => toggleEmoji(emoji)}
+                    className={`rounded-lg px-3 py-2 text-xl transition-all ${
+                      selectedEmojis.includes(emoji)
+                        ? "bg-primary text-primary-foreground ring-2 ring-primary"
+                        : "hover:bg-gray-100"
+                    }`}
+                  >
+                    {emoji}
+                  </button>
+                ))}
               </div>
-            </>
-          )}
-        </Dialog.Panel>
-      </div>
+              {selectedEmojis.length > 0 && (
+                <p className="text-sm text-muted-foreground">
+                  Selected: {selectedEmojis.join(" ")}
+                </p>
+              )}
+            </div>
+
+            {/* Error Alert */}
+            {error && (
+              <Alert variant="destructive">
+                <Icon icon="mdi:alert-circle" className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+            {/* Actions */}
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                onClick={handleClose}
+                disabled={uploading}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleUpload}
+                disabled={uploading || !selectedFile || !title.trim()}
+                className="flex-1"
+              >
+                {uploading ? (
+                  <>
+                    <Icon icon="mdi:loading" className="mr-2 h-4 w-4 animate-spin" />
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <Icon icon="mdi:upload" className="mr-2 h-4 w-4" />
+                    Upload Memory
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        )}
+      </DialogContent>
     </Dialog>
   );
 }
-

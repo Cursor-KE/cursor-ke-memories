@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
-import Bridge from "../components/Icons/Bridge";
+import { Icon } from "@iconify/react";
 import Logo from "../components/Icons/Logo";
 import Modal from "../components/Modal";
 import UploadModal from "../components/UploadModal";
@@ -52,20 +52,24 @@ const Home: NextPage = ({ images }: { images: ImageProps[] }) => {
           />
         )}
         <div className="columns-1 gap-4 sm:columns-2 xl:columns-3 2xl:columns-4">
-          <div className="after:content relative mb-5 flex h-[629px] flex-col items-center justify-end gap-4 overflow-hidden rounded-lg bg-white/10 px-6 pb-16 pt-64 text-center text-white shadow-highlight after:pointer-events-none after:absolute after:inset-0 after:rounded-lg after:shadow-highlight lg:pt-0">
-            <div className="absolute inset-0 flex items-center justify-center opacity-20">
-              <span className="flex max-h-full max-w-full items-center justify-center">
-                <Bridge />
-              </span>
-              <span className="absolute left-0 right-0 bottom-0 h-[400px] bg-gradient-to-b from-black/0 via-black to-black"></span>
+          <div className="after:content relative mb-5 flex h-[629px] flex-col items-center justify-end gap-4 overflow-hidden rounded-lg bg-black text-center text-white shadow-highlight after:pointer-events-none after:absolute after:inset-0 after:rounded-lg after:shadow-highlight">
+            <Image
+              src="/nai.png"
+              alt="Nairobi Skyline"
+              fill
+              className="object-cover"
+              priority
+              sizes="(max-width: 1280px) 100vw, 50vw"
+            />
+            <div className="relative z-10 flex flex-col items-center gap-4 px-6 pb-16">
+              <Logo />
+              <h1 className="mt-8 mb-4 text-base font-bold uppercase tracking-widest">
+                Cursor Kenya Memories
+              </h1>
+              <p className="max-w-[40ch] text-white/75 sm:max-w-[32ch]">
+                Relive the amazing moments from Cursor Kenya events and meetups!
+              </p>
             </div>
-            <Logo />
-            <h1 className="mt-8 mb-4 text-base font-bold uppercase tracking-widest">
-              Cursor Kenya Memories
-            </h1>
-            <p className="max-w-[40ch] text-white/75 sm:max-w-[32ch]">
-              Relive the amazing moments from Cursor Kenya events and meetups!
-            </p>
           </div>
           {images.map(({ id, public_id, format, blurDataUrl }) => (
             <Link
@@ -104,20 +108,7 @@ const Home: NextPage = ({ images }: { images: ImageProps[] }) => {
         className="fixed bottom-8 right-8 bg-black text-white rounded-full p-4 shadow-lg hover:bg-gray-800 transition"
         title="Upload your memory"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-6 w-6"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 4v16m8-8H4"
-          />
-        </svg>
+        <Icon icon="mdi:plus" className="h-6 w-6" />
       </button>
 
       {/* Upload Modal */}

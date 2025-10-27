@@ -4,7 +4,7 @@ export default function Logo() {
   return (
     <div className="flex items-center justify-center">
       <Image
-        src="/APP_ICON_2D_DARK.png"
+        src="/cursor-community-avatar.png"
         alt="Cursor Kenya Logo"
         width={250}
         height={250}
