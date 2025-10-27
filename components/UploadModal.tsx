@@ -21,6 +21,7 @@ import {
 } from "./ui/select";
 import { Alert, AlertDescription } from "./ui/alert";
 import { Card, CardContent } from "./ui/card";
+import { compressImageToTarget } from "../utils/compressImage";
 
 interface UploadModalProps {
   isOpen: boolean;
@@ -93,12 +94,21 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
       const sign = await fetch("/api/sign-cloudinary", { method: "POST" }).then((r) => r.json());
 
       // Step 2: direct upload to Cloudinary with progress
+    const TEN_MB = 10 * 1024 * 1024;
+    let fileToUpload = selectedFile;
+    if (fileToUpload.size > TEN_MB) {
+      fileToUpload = await compressImageToTarget(fileToUpload, TEN_MB, {
+        preferMime: "image/webp",
+        minQuality: 0.6,
+        maxQuality: 0.95,
+      });
+    }
       let cloudinaryData: any = null;
       setUploadPercent(0);
 
       await new Promise<void>((resolve, reject) => {
         const form = new FormData();
-        form.append("file", selectedFile);
+      form.append("file", fileToUpload);
         form.append("api_key", sign.apiKey);
         form.append("timestamp", String(sign.timestamp));
         form.append("signature", sign.signature);
