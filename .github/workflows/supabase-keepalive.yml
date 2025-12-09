@@ -19,17 +19,34 @@ jobs:
             echo "Missing SUPABASE_URL secret. Set it to https://<project-ref>.supabase.co"
             exit 1
           fi
-      - name: Ping Auth health endpoint
+      - name: Normalize base URL
         run: |
           set -euo pipefail
-          curl -fsS "${SUPABASE_URL%/}/auth/v1/health" -o /dev/null
-      - name: Best-effort ping PostgREST (optional)
+          BASE="${SUPABASE_URL%/}"
+          # Strip common subpaths if user pasted REST or AUTH URLs
+          BASE="${BASE%%/rest/v1*}"
+          BASE="${BASE%%/auth/v1*}"
+          echo "SUPABASE_ORIGIN=${BASE}" >> "$GITHUB_ENV"
+          echo "Using origin: ${BASE}"
+      - name: Ping Auth health endpoint (non-fatal)
+        run: |
+          # Do not fail the job on non-2xx; we only want to wake the project.
+          CODE="$(curl -sS -m 15 -o /dev/null -w "%{http_code}" "${SUPABASE_ORIGIN}/auth/v1/health" || echo 000)"
+          echo "Auth health HTTP ${CODE}"
+          # Always succeed
+          true
+      - name: Ping PostgREST without key (non-fatal)
+        run: |
+          CODE="$(curl -sS -I -m 15 -o /dev/null -w "%{http_code}" "${SUPABASE_ORIGIN}/rest/v1/" || echo 000)"
+          echo "REST root (no key) HTTP ${CODE}"
+          true
+      - name: Ping PostgREST with key (optional, non-fatal)
         if: ${{ env.SUPABASE_ANON_KEY != '' }}
         run: |
-          set -euo pipefail
-          # Attempt a lightweight request to PostgREST; ignore failures due to RLS/permissions.
-          curl -fsSI \
+          CODE="$(curl -sS -I -m 15 -o /dev/null -w "%{http_code}" \
             -H "apikey: ${SUPABASE_ANON_KEY}" \
             -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
-            "${SUPABASE_URL%/}/rest/v1/" || true
+            "${SUPABASE_ORIGIN}/rest/v1/" || echo 000)"
+          echo "REST root (with key) HTTP ${CODE}"
+          true
 
