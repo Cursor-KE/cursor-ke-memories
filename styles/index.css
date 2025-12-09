@@ -10,8 +10,9 @@
 
 @layer base {
   :root {
-    --background: oklch(0.9551 0 0);
-    --foreground: oklch(0.3211 0 0);
+    /* HSL tokens (no function) so Tailwind's hsl(var(--token)) works */
+    --background: 0 3% 12%;
+    --foreground: 0 0% 12.5490%;
     --card: oklch(0.9702 0 0);
     --card-foreground: oklch(0.3211 0 0);
     --popover: oklch(0.9702 0 0);
@@ -65,8 +66,9 @@
     --tracking-normal: 0em;
   }
   .dark {
-    --background: oklch(0.2178 0 0);
-    --foreground: oklch(0.8853 0 0);
+    /* Use the same dark tone as the avatar background */
+    --background: 0 3% 12%;
+    --foreground: 0 0% 97.6471%;
     --card: oklch(0.2435 0 0);
     --card-foreground: oklch(0.8853 0 0);
     --popover: oklch(0.2435 0 0);

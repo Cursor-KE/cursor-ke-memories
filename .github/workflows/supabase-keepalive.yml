@@ -1,0 +1,35 @@
+name: Keep Supabase alive
+
+on:
+  schedule:
+    - cron: "*/14 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+    steps:
+      - name: Validate configuration
+        run: |
+          if [ -z "${SUPABASE_URL}" ]; then
+            echo "Missing SUPABASE_URL secret. Set it to https://<project-ref>.supabase.co"
+            exit 1
+          fi
+      - name: Ping Auth health endpoint
+        run: |
+          set -euo pipefail
+          curl -fsS "${SUPABASE_URL%/}/auth/v1/health" -o /dev/null
+      - name: Best-effort ping PostgREST (optional)
+        if: ${{ env.SUPABASE_ANON_KEY != '' }}
+        run: |
+          set -euo pipefail
+          # Attempt a lightweight request to PostgREST; ignore failures due to RLS/permissions.
+          curl -fsSI \
+            -H "apikey: ${SUPABASE_ANON_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+            "${SUPABASE_URL%/}/rest/v1/" || true
+
