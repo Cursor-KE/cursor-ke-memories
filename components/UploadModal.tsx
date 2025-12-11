@@ -34,6 +34,8 @@ const EVENT_TITLES = [
   "cursor KE x makevewave Hack",
   "cursor KE x Payhero hack",
   "Cursor KE Kisumu Hack",
+  "cursor code haven hacks",
+  "cursor meet #2.0",
 ];
 
 const EMOJIS = ["🇰🇪", "💻", "🎉", "🚀", "🔥", "✨", "💡", "🎯", "👥", "🤝", "🏆", "📸", "😊", "❤️", "💯"];
