@@ -2,23 +2,30 @@ name: Keep Supabase alive
 
 on:
   schedule:
-    - cron: "*/14 * * * *"
+    # Run every Sunday at midnight UTC to keep Supabase instance active
+    - cron: "0 0 * * 0"
   workflow_dispatch:
 
 jobs:
   ping:
     runs-on: ubuntu-latest
-    timeout-minutes: 2
+    timeout-minutes: 5
+    permissions:
+      contents: read
     env:
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+    
     steps:
-      - name: Validate configuration
+      - name: Set default Supabase URL if secret not set
         run: |
           if [ -z "${SUPABASE_URL}" ]; then
-            echo "Missing SUPABASE_URL secret. Set it to https://<project-ref>.supabase.co"
-            exit 1
+            echo "SUPABASE_URL=https://wlqtxgvsbxpttdzwpwbm.supabase.co" >> "$GITHUB_ENV"
+            echo "Using default Supabase URL"
+          else
+            echo "SUPABASE_URL=${SUPABASE_URL}" >> "$GITHUB_ENV"
           fi
+      
       - name: Normalize base URL
         run: |
           set -euo pipefail
@@ -28,25 +35,49 @@ jobs:
           BASE="${BASE%%/auth/v1*}"
           echo "SUPABASE_ORIGIN=${BASE}" >> "$GITHUB_ENV"
           echo "Using origin: ${BASE}"
-      - name: Ping Auth health endpoint (non-fatal)
+      
+      - name: Ping Auth health endpoint
+        continue-on-error: true
         run: |
-          # Do not fail the job on non-2xx; we only want to wake the project.
+          echo "Pinging Auth endpoint..."
           CODE="$(curl -sS -m 15 -o /dev/null -w "%{http_code}" "${SUPABASE_ORIGIN}/auth/v1/health" || echo 000)"
           echo "Auth health HTTP ${CODE}"
-          # Always succeed
-          true
-      - name: Ping PostgREST without key (non-fatal)
+          if [ "$CODE" = "200" ] || [ "$CODE" = "204" ]; then
+            echo "✅ Auth endpoint is healthy"
+          else
+            echo "⚠️ Auth endpoint returned ${CODE}"
+          fi
+      
+      - name: Ping PostgREST endpoint
+        continue-on-error: true
         run: |
+          echo "Pinging PostgREST endpoint..."
           CODE="$(curl -sS -I -m 15 -o /dev/null -w "%{http_code}" "${SUPABASE_ORIGIN}/rest/v1/" || echo 000)"
-          echo "REST root (no key) HTTP ${CODE}"
-          true
-      - name: Ping PostgREST with key (optional, non-fatal)
+          echo "REST root HTTP ${CODE}"
+          if [ "$CODE" = "200" ] || [ "$CODE" = "401" ]; then
+            echo "✅ REST endpoint is responding"
+          else
+            echo "⚠️ REST endpoint returned ${CODE}"
+          fi
+      
+      - name: Query database with API key
         if: ${{ env.SUPABASE_ANON_KEY != '' }}
+        continue-on-error: true
         run: |
-          CODE="$(curl -sS -I -m 15 -o /dev/null -w "%{http_code}" \
+          echo "Querying database with API key..."
+          CODE="$(curl -sS -m 15 -o /dev/null -w "%{http_code}" \
             -H "apikey: ${SUPABASE_ANON_KEY}" \
             -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
-            "${SUPABASE_ORIGIN}/rest/v1/" || echo 000)"
-          echo "REST root (with key) HTTP ${CODE}"
-          true
+            "${SUPABASE_ORIGIN}/rest/v1/memories?select=id&limit=1" || echo 000)"
+          echo "Database query HTTP ${CODE}"
+          if [ "$CODE" = "200" ] || [ "$CODE" = "404" ]; then
+            echo "✅ Database is accessible"
+          else
+            echo "⚠️ Database query returned ${CODE}"
+          fi
+      
+      - name: Summary
+        run: |
+          echo "🎯 Keepalive ping completed"
+          echo "This workflow runs every Sunday at midnight UTC to prevent Supabase free tier from pausing"
 
